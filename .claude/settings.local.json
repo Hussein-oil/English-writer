@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create *)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(node server.js)",
+      "Bash(curl -s \"http://localhost:3001/api/transcript?videoId=dQw4w9WgXcW\")",
+      "Bash(kill %1)",
+      "Bash(netstat -ano)",
+      "Bash(findstr \":3001 \")",
+      "Bash(findstr \":5173 \")",
+      "Bash(taskkill /PID 7408 /F)",
+      "Bash(taskkill /PID 7908 /F)",
+      "Bash(taskkill /PID 7216 /F)",
+      "PowerShell(Stop-Process *)",
+      "Bash(curl -s \"http://localhost:3001/api/transcript?videoId=INVALID_ID_!\")",
+      "Bash(curl -s \"http://localhost:3001/api/transcript?videoId=jNQXAC9IVRw\")",
+      "PowerShell(New-Item *)",
+      "PowerShell(Get-Process *)"
+    ]
+  }
+}

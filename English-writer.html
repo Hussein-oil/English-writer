@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Typing Gazette — Keyboard Drills &amp; Writer's Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#e9e3d1;
+  --paper-2:#e1d9c2;
+  --paper-3:#d6cdb2;
+  --ink:#1f1d18;
+  --ink-soft:#46423a;
+  --ink-faint:#7d776a;
+  --red:#741310;
+  --red-2:#8f221b;
+  --rule:#2a2620;
+  --ok:#2f4a2a;
+  --bad:#741310;
+  --bad-bg:rgba(143,34,27,0.18);
+  --shadow:0 2px 0 rgba(31,29,24,0.18), 0 10px 30px rgba(31,29,24,0.18);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Old Standard TT",Georgia,serif;
+  font-size:18px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(rgba(31,29,24,0.035) 1px, transparent 1px),
+    radial-gradient(rgba(31,29,24,0.025) 1px, transparent 1px);
+  background-size:7px 7px, 13px 13px;
+  background-position:0 0, 3px 4px;
+}
+/* faint aged vignette */
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;
+  box-shadow:inset 0 0 160px rgba(60,45,25,0.22);
+  mix-blend-mode:multiply;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 80px}
+
+/* ---------- Masthead ---------- */
+.masthead{border-bottom:3px double var(--rule);padding-bottom:10px;margin-bottom:8px}
+.dateline{
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:"Old Standard TT",serif;text-transform:uppercase;letter-spacing:2px;
+  font-size:12px;color:var(--ink-soft);border-bottom:1px solid var(--rule);
+  padding-bottom:6px;margin-bottom:8px;gap:10px;flex-wrap:wrap;
+}
+.dateline .vol{color:var(--red)}
+.title{
+  font-family:"UnifrakturCook",serif;font-weight:700;text-align:center;
+  font-size:clamp(40px,9vw,86px);line-height:0.95;margin:6px 0 4px;color:var(--ink);
+  text-shadow:1px 1px 0 rgba(0,0,0,0.08);
+}
+.subtitle{
+  text-align:center;font-style:italic;color:var(--red);
+  letter-spacing:1px;font-size:clamp(13px,2.2vw,17px);
+  border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+  padding:4px 0;margin-top:6px;
+}
+
+/* ---------- Nav tabs (newspaper sections) ---------- */
+nav.sections{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:0;margin:14px 0 6px;
+  border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+}
+nav.sections button{
+  background:transparent;border:none;cursor:pointer;color:var(--ink-soft);
+  font-family:"Playfair Display",serif;font-weight:700;text-transform:uppercase;
+  letter-spacing:2px;font-size:13px;padding:11px 18px;position:relative;
+  border-right:1px solid var(--rule);transition:background .15s,color .15s;
+}
+nav.sections button:last-child{border-right:none}
+nav.sections button:hover{color:var(--ink);background:rgba(31,29,24,0.05)}
+nav.sections button.active{color:#fff;background:var(--red)}
+nav.sections button .num{font-size:10px;vertical-align:super;color:var(--red);margin-right:3px}
+nav.sections button.active .num{color:#f3d9c8}
+
+/* ---------- Panels ---------- */
+.panel{display:none;animation:fade .4s ease}
+.panel.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.kicker{font-family:"Playfair Display",serif;font-weight:900;color:var(--red);
+  text-transform:uppercase;letter-spacing:3px;font-size:12px;margin:0 0 2px}
+.headline{font-family:"Playfair Display",serif;font-weight:900;font-size:clamp(26px,5vw,40px);
+  line-height:1.05;margin:0 0 4px;color:var(--ink)}
+.standfirst{font-style:italic;color:var(--ink-soft);max-width:60ch;margin:0 0 18px;font-size:16px}
+
+.col-rule{border-top:3px solid var(--rule);margin:18px 0}
+
+/* generic controls */
+.btn{
+  font-family:"Old Standard TT",serif;font-size:15px;cursor:pointer;
+  background:var(--ink);color:var(--paper);border:1px solid var(--rule);
+  padding:9px 16px;letter-spacing:.5px;display:inline-flex;align-items:center;gap:8px;
+  transition:transform .08s, background .15s;
+}
+.btn:hover{background:var(--ink-soft)}
+.btn:active{transform:translateY(1px)}
+.btn.red{background:var(--red);border-color:var(--red)}
+.btn.red:hover{background:var(--red-2)}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.ghost:hover{background:rgba(31,29,24,0.07)}
+.btn svg{width:16px;height:16px;flex:none}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+label.fld{display:block;font-size:12px;text-transform:uppercase;letter-spacing:1.5px;
+  color:var(--ink-soft);margin:0 0 4px}
+textarea,input[type=text],input[type=password],select{
+  font-family:"Special Elite",monospace;font-size:16px;width:100%;
+  background:var(--paper-2);border:1px solid var(--rule);color:var(--ink);
+  padding:10px 12px;resize:vertical;line-height:1.7;
+}
+textarea:focus,input:focus,select:focus{outline:2px solid var(--red);outline-offset:-2px}
+select{font-family:"Old Standard TT",serif}
+.row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+.row > *{min-width:0}
+.spacer{flex:1}
+small.note{display:block;color:var(--ink-faint);font-style:italic;font-size:13px;margin-top:6px}
+
+/* ---------- Compose ---------- */
+#composeText{min-height:230px}
+.samples{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.tag{cursor:pointer;font-size:12px;letter-spacing:1px;text-transform:uppercase;
+  border:1px solid var(--rule);padding:5px 10px;background:transparent;color:var(--ink-soft);font-family:"Old Standard TT",serif}
+.tag:hover{background:var(--ink);color:var(--paper)}
+
+/* ---------- Trainer ---------- */
+.trainer-bar{display:flex;gap:18px;flex-wrap:wrap;align-items:center;
+  border:1px solid var(--rule);background:var(--paper-2);padding:12px 16px;margin-bottom:16px}
+.stat{display:flex;flex-direction:column;line-height:1.1}
+.stat .v{font-family:"Playfair Display",serif;font-weight:900;font-size:26px;color:var(--ink)}
+.stat .v.red{color:var(--red)}
+.stat .k{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--ink-faint)}
+.stat .v small{font-size:13px;color:var(--ink-faint);font-family:"Old Standard TT",serif}
+
+.typebox{position:relative;border:1px solid var(--rule);background:var(--paper-2);
+  padding:26px 26px 30px;cursor:text;box-shadow:var(--shadow)}
+.typebox::before{content:"DRILL";position:absolute;top:8px;right:14px;font-size:10px;
+  letter-spacing:3px;color:var(--ink-faint)}
+.target{font-family:"Special Elite",monospace;font-size:clamp(19px,3vw,26px);
+  line-height:1.95;word-spacing:2px;letter-spacing:.3px;white-space:pre-wrap}
+.target span{position:relative;transition:color .05s}
+.target span.pending{color:var(--ink-faint)}
+.target span.correct{color:var(--ink)}
+.target span.incorrect{color:#fff;background:var(--bad);border-radius:2px}
+.target span.incorrect.space{background:var(--bad-bg)}
+.target span.current::before{
+  content:"";position:absolute;left:-2px;top:8%;height:84%;width:2px;background:var(--red);
+  animation:blink 1s steps(1) infinite;
+}
+/* shake on wrong char */
+.typebox.blocked{ border-color:var(--red); }
+.typebox.shake{ animation:shake .25s linear; }
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-6px)}
+  40%{transform:translateX(6px)}
+  60%{transform:translateX(-4px)}
+  80%{transform:translateX(4px)}
+}
+@keyframes blink{50%{opacity:0}}
+/* blocked cursor turns solid red */
+.target span.current.blocked::before{ background:var(--bad);animation:none; }
+
+/* Always-visible typing input — the reliable cross-device solution */
+.type-row{margin-top:0;border-top:2px solid var(--rule)}
+.type-row input{
+  width:100%;border:none;border-bottom:2px solid var(--rule);
+  background:var(--paper-3);
+  font-family:"Special Elite",monospace;font-size:clamp(17px,3vw,22px);
+  padding:14px 20px;color:var(--ink);letter-spacing:.4px;
+  outline:none;display:block;
+  /* prevent iOS zoom on focus */
+  font-size:max(16px, clamp(16px,3vw,22px));
+}
+.type-row input:focus{
+  background:var(--paper);
+  border-bottom-color:var(--red);
+  box-shadow:0 3px 0 var(--red);
+}
+.type-row input::placeholder{color:var(--ink-faint);font-style:italic;font-family:"Old Standard TT",serif;font-size:15px}
+.drill-foot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-top:14px}
+.progressline{font-family:"Old Standard TT",serif;color:var(--ink-soft);font-size:14px}
+.progressline b{color:var(--red)}
+.repdots{display:inline-flex;gap:5px;margin-left:8px;vertical-align:middle}
+.repdots i{width:9px;height:9px;border:1px solid var(--rule);display:inline-block;border-radius:50%}
+.repdots i.done{background:var(--red);border-color:var(--red)}
+.repdots i.now{background:var(--ink)}
+
+.toggle{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;
+  text-transform:uppercase;letter-spacing:1px;color:var(--ink-soft)}
+.switch{width:42px;height:22px;border:1px solid var(--rule);background:var(--paper-3);position:relative;transition:background .2s}
+.switch::after{content:"";position:absolute;top:1px;left:1px;width:18px;height:18px;background:var(--ink);transition:left .2s}
+.toggle.on .switch{background:var(--red)}
+.toggle.on .switch::after{left:21px;background:var(--paper)}
+
+.finish{text-align:center;border:3px double var(--rule);padding:26px;background:var(--paper-2)}
+.finish .big{font-family:"Playfair Display",serif;font-weight:900;font-size:54px;color:var(--red);line-height:1}
+
+/* ---------- Editor ---------- */
+.toolbar{display:flex;gap:4px;flex-wrap:wrap;border:1px solid var(--rule);border-bottom:none;
+  background:var(--paper-3);padding:8px}
+.tbtn{width:34px;height:32px;display:inline-flex;align-items:center;justify-content:center;
+  background:transparent;border:1px solid transparent;cursor:pointer;color:var(--ink)}
+.tbtn:hover{background:var(--paper);border-color:var(--rule)}
+.tbtn.wide{width:auto;padding:0 10px;font-size:13px;letter-spacing:1px}
+.tbtn svg{width:17px;height:17px}
+.tsep{width:1px;background:var(--rule);margin:2px 4px}
+.editor-grid{display:grid;grid-template-columns:1fr 320px;gap:0}
+@media(max-width:820px){.editor-grid{grid-template-columns:1fr}}
+.editable{min-height:420px;border:1px solid var(--rule);background:#f3efe2;padding:26px 30px;
+  font-family:"Old Standard TT",serif;font-size:18px;line-height:1.7;overflow-y:auto;
+  box-shadow:var(--shadow)}
+.editable:focus{outline:none;border-color:var(--red)}
+.editable h1{font-family:"Playfair Display",serif;font-size:30px;margin:.2em 0}
+.editable h2{font-family:"Playfair Display",serif;font-size:23px;margin:.2em 0}
+.checkpane{border:1px solid var(--rule);border-left:none;background:var(--paper-2);display:flex;flex-direction:column}
+@media(max-width:820px){.checkpane{border-left:1px solid var(--rule);border-top:none}}
+.checkhead{padding:12px 14px;border-bottom:1px solid var(--rule);background:var(--paper-3);
+  font-family:"Playfair Display",serif;font-weight:900;text-transform:uppercase;letter-spacing:2px;font-size:13px;
+  display:flex;align-items:center;gap:8px}
+.checkhead .count{margin-left:auto;background:var(--red);color:#fff;font-size:12px;padding:1px 9px;border-radius:10px;font-family:"Old Standard TT"}
+.issues{padding:8px;overflow-y:auto;max-height:520px}
+.issue{border:1px solid var(--rule);background:var(--paper);padding:10px 12px;margin-bottom:8px}
+.issue .type{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--red);font-weight:700}
+.issue .msg{font-size:14px;margin:3px 0 6px;color:var(--ink-soft)}
+.issue .ctx{font-family:"Special Elite",monospace;font-size:13px;background:var(--paper-2);padding:5px 7px;display:block;margin-bottom:7px}
+.issue .ctx del{color:var(--bad);text-decoration:line-through}
+.issue .ctx ins{color:var(--ok);text-decoration:none;font-weight:700}
+.issue .apply{font-size:12px;padding:5px 12px;letter-spacing:.5px}
+.clean{padding:30px 16px;text-align:center;color:var(--ink-faint);font-style:italic}
+.clean svg{width:38px;height:38px;color:var(--ok);margin-bottom:8px}
+
+/* ---------- Quiz ---------- */
+.cfg{border:1px solid var(--rule);background:var(--paper-2);padding:16px;margin-bottom:18px}
+.cfg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.q{border:1px solid var(--rule);background:var(--paper-2);padding:16px 18px;margin-bottom:14px}
+.q .qno{font-family:"Playfair Display",serif;font-weight:900;color:var(--red);font-size:13px;letter-spacing:1px}
+.q .qtext{font-size:18px;margin:4px 0 12px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--rule);
+  background:var(--paper);margin-bottom:6px;cursor:pointer;font-size:16px}
+.opt:hover{background:var(--paper-3)}
+.opt input{width:auto;flex:none;margin-top:4px}
+.opt.correct{border-color:var(--ok);background:rgba(47,74,42,0.12)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.q .explain{font-style:italic;color:var(--ink-soft);font-size:14px;margin-top:8px;border-top:1px dashed var(--rule);padding-top:8px;display:none}
+.q.graded .explain{display:block}
+.q .model{font-family:"Special Elite",monospace;font-size:14px;background:var(--paper);padding:8px 10px;margin-top:8px;display:none}
+.q.graded .model{display:block}
+.scorecard{text-align:center;border:3px double var(--rule);background:var(--paper-2);padding:24px;margin-bottom:18px}
+.scorecard .pct{font-family:"Playfair Display",serif;font-weight:900;font-size:58px;color:var(--red);line-height:1}
+.loader{display:inline-block;width:16px;height:16px;border:2px solid var(--paper);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.errbox{border:1px solid var(--bad);background:var(--bad-bg);padding:12px 14px;color:var(--ink);font-size:14px;margin-top:12px}
+
+/* file upload */
+.upload-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
+.upload-status{font-style:italic;color:var(--ink-soft);font-size:14px}
+.upload-status.err{color:var(--bad)}
+
+/* writing answers + AI grading */
+.q textarea{min-height:80px;margin-top:4px}
+.write-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.btn.small{font-size:13px;padding:6px 12px}
+.feedback{margin-top:10px;border:1px solid var(--rule);background:var(--paper);padding:10px 12px;font-size:14px;display:none}
+.feedback.show{display:block}
+.feedback .score{font-family:"Playfair Display",serif;font-weight:900;color:var(--red);font-size:20px}
+
+/* pronunciation */
+.speak-card{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px}
+.speak-sentence{font-family:"Special Elite",monospace;font-size:18px;background:var(--paper);
+  border:1px solid var(--rule);padding:10px 14px;flex:1 1 100%;line-height:1.6}
+.speak-result{flex:1 1 100%;font-size:14px;color:var(--ink-soft);font-style:italic;display:none}
+.speak-result.show{display:block}
+.speak-result b{color:var(--ok)}
+.speak-result.low b{color:var(--bad)}
+/* phonetic syllable guide */
+.phon-guide{
+  margin-top:10px;padding:10px 12px;background:var(--paper);
+  border:1px solid var(--rule);font-style:normal;
+  font-family:"Special Elite",monospace;font-size:15px;
+  letter-spacing:.5px;line-height:2;
+}
+.pword{
+  display:inline-block;border-bottom:2px dotted var(--red);
+  cursor:help;margin:0 2px;
+}
+.speak-result code{
+  font-family:"Special Elite",monospace;font-size:12px;
+  background:var(--paper-3);padding:1px 5px;
+}
+
+footer{margin-top:40px;border-top:3px double var(--rule);padding-top:12px;text-align:center;
+  font-size:12px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:2px}
+.hidden{display:none!important}
+
+/* simplified key row */
+.key-row{display:flex;gap:10px;align-items:stretch}
+.key-row input{flex:1}
+.key-row .btn{white-space:nowrap}
+.model-row{display:flex;gap:10px;align-items:stretch}
+.model-row select{flex:1}
+.model-row .btn{white-space:nowrap}
+
+/* ============================================================
+   RESPONSIVE  —  phone / tablet / iPad / desktop
+   ============================================================ */
+/* tablets & iPad portrait */
+@media(max-width:900px){
+  .editor-grid{grid-template-columns:1fr}
+  .checkpane{border-left:1px solid var(--rule);border-top:none}
+  .issues{max-height:340px}
+}
+/* large phones & small tablets */
+@media(max-width:640px){
+  body{font-size:16px}
+  .wrap{padding:12px 10px 64px}
+  .title{font-size:clamp(34px,13vw,60px)}
+  .dateline{font-size:10px;letter-spacing:1px;justify-content:center;text-align:center}
+  nav.sections{flex-wrap:wrap;border-left:1px solid var(--rule)}
+  nav.sections button{flex:1 1 48%;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);
+    font-size:11px;letter-spacing:1px;padding:11px 6px;text-align:center}
+  .headline{font-size:clamp(22px,7vw,30px)}
+  .trainer-bar{gap:10px 16px;padding:10px 12px}
+  .stat .v{font-size:21px}
+  .typebox{padding:18px 16px 22px}
+  .target{font-size:clamp(18px,5.4vw,22px);line-height:1.85}
+  .editable{padding:18px 16px;min-height:320px}
+  .toolbar{padding:6px}
+  .tbtn{width:32px;height:30px}
+  .drill-foot{flex-direction:column;align-items:stretch}
+  .drill-foot > div{justify-content:center}
+  .row .btn,.drill-foot .btn{flex:1;justify-content:center}
+  .key-row{flex-direction:column}
+  .key-row .btn{justify-content:center}
+  .model-row{flex-direction:column}
+  .model-row .btn{justify-content:center}
+  .finish .big,.scorecard .pct{font-size:44px}
+}
+/* very small phones */
+@media(max-width:380px){
+  nav.sections button{flex:1 1 100%}
+  .stat{flex:1 1 40%}
+}
+/* coarse-pointer (touch) niceties */
+@media(hover:none){
+  .btn,.tbtn,.tag,nav.sections button,.opt{-webkit-tap-highlight-color:transparent}
+  .tbtn{width:38px;height:36px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===================== MASTHEAD ===================== -->
+  <header class="masthead">
+    <div class="dateline">
+      <span class="vol">Vol. I &mdash; No. 7</span>
+      <span id="todayDate">&mdash;</span>
+      <span>Price: One Keystroke</span>
+    </div>
+    <h1 class="title">The Typing Gazette</h1>
+    <div class="subtitle">Keyboard Drills, a Writer's Desk &amp; an Examiner of Letters &mdash; Established for the Diligent Student of English</div>
+  </header>
+
+  <nav class="sections">
+    <button data-tab="compose" class="active"><span class="num">I.</span>The Press Room</button>
+    <button data-tab="trainer"><span class="num">II.</span>Typing Drills</button>
+    <button data-tab="editor"><span class="num">III.</span>The Writer's Desk</button>
+    <button data-tab="quiz"><span class="num">IV.</span>The Examination</button>
+  </nav>
+
+  <!-- ===================== I. COMPOSE ===================== -->
+  <section class="panel active" id="compose">
+    <p class="kicker">Submit Your Manuscript</p>
+    <h2 class="headline">Set the Text for Today's Edition</h2>
+    <p class="standfirst">Paste any story or passage below. The Gazette will divide it into sentences and prepare your repetition drills, your editing desk, and an examination.</p>
+    <label class="fld" for="composeText">The Passage</label>
+    <textarea id="composeText" placeholder="Paste your English story or passage here...">The old lighthouse keeper climbed the winding stairs every evening. He carried a small lantern and a worn notebook. The sea was rough that night, and the wind howled against the glass. He lit the great lamp and watched the beam sweep across the dark water. Far below, a single fishing boat fought the waves. The keeper whispered a quiet prayer for the sailors. By dawn, the storm had passed and the boat reached the harbour safely.</textarea>
+
+    <div class="upload-row">
+      <button class="btn ghost" id="uploadBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Upload a file (PDF / TXT)
+      </button>
+      <input type="file" id="fileInput" accept=".txt,.md,.csv,.text,.rtf,.pdf,text/plain,application/pdf" style="display:none">
+      <span class="upload-status" id="uploadStatus"></span>
+    </div>
+
+    <div class="samples">
+      <span style="font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-faint);align-self:center">Load a sample:</span>
+      <button class="tag" data-sample="fox">The Quick Fox</button>
+      <button class="tag" data-sample="city">A City at Dawn</button>
+      <button class="tag" data-sample="letter">An Old Letter</button>
+    </div>
+    <div class="col-rule"></div>
+    <div class="row">
+      <div>
+        <label class="fld" for="repCount">Repetitions per sentence</label>
+        <select id="repCount" style="width:140px">
+          <option value="2">2 times</option>
+          <option value="3" selected>3 times</option>
+          <option value="4">4 times</option>
+          <option value="5">5 times</option>
+        </select>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn red" id="startBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="6 4 20 12 6 20 6 4" fill="currentColor" stroke="none"/></svg>
+        Set Type &amp; Begin Drills
+      </button>
+    </div>
+    <small class="note">Tip: longer passages create more drills. Punctuation is preserved exactly &mdash; you must type it correctly.</small>
+  </section>
+
+  <!-- ===================== II. TRAINER ===================== -->
+  <section class="panel" id="trainer">
+    <p class="kicker">Repetition Builds the Hand</p>
+    <h2 class="headline">Typing Drills</h2>
+
+    <div class="trainer-bar">
+      <div class="stat"><span class="v red" id="stWpm">0</span><span class="k">Words / Min</span></div>
+      <div class="stat"><span class="v" id="stAcc">100<small>%</small></span><span class="k">Accuracy</span></div>
+      <div class="stat"><span class="v" id="stErr">0</span><span class="k">Errors</span></div>
+      <div class="spacer"></div>
+      <div class="toggle on" id="soundToggle" title="Toggle typewriter sound">
+        <span id="soundIcon"></span>
+        <span class="switch"></span>
+        <span>Sound</span>
+      </div>
+    </div>
+
+    <div id="drillArea">
+      <div class="typebox" id="typebox">
+        <div class="target" id="target"></div>
+      </div>
+      <!-- Always-visible input — works on every device / browser -->
+      <div class="type-row">
+        <input type="text" id="typeInput"
+          autocomplete="off" autocorrect="off" autocapitalize="off"
+          autocomplete="new-password" spellcheck="false"
+          inputmode="text" enterkeyhint="next"
+          placeholder="Tap here and start typing the sentence above…">
+      </div>
+      <div class="drill-foot">
+        <div class="progressline">
+          Sentence <b id="sIdx">1</b> / <span id="sTotal">1</span>
+          &nbsp;&middot;&nbsp; Repetition
+          <span class="repdots" id="repDots"></span>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn ghost" id="restartLine">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+            Retry line
+          </button>
+          <button class="btn ghost" id="skipLine">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4" fill="currentColor" stroke="none"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+            Skip
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="finishArea" class="finish hidden">
+      <p class="kicker">Edition Complete</p>
+      <div class="big" id="finWpm">0</div>
+      <p style="margin:4px 0 0">words per minute &middot; <b id="finAcc">100%</b> accuracy &middot; <b id="finErr">0</b> total errors</p>
+      <div style="margin-top:18px">
+        <button class="btn red" id="againBtn">Run the Drills Again</button>
+        <button class="btn ghost" id="toEditorBtn">Go to the Writer's Desk</button>
+      </div>
+    </div>
+
+    <small class="note" id="trainerEmpty" style="display:none">No passage set yet. Visit <b>The Press Room</b> to submit a manuscript.</small>
+  </section>
+
+  <!-- ===================== III. EDITOR ===================== -->
+  <section class="panel" id="editor">
+    <p class="kicker">Polish Every Sentence</p>
+    <h2 class="headline">The Writer's Desk</h2>
+    <p class="standfirst">A plain-text editor with formatting and a built-in proof-reader. Misspellings are underlined by your browser; press <b>Proof-read</b> for grammar &amp; style notes &mdash; or call upon the Artificial Examiner for a deeper review.</p>
+
+    <div class="toolbar" id="toolbar">
+      <button class="tbtn" data-cmd="bold" title="Bold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 4h8a4 4 0 0 1 0 8H6zM6 12h9a4 4 0 0 1 0 8H6z"/></svg></button>
+      <button class="tbtn" data-cmd="italic" title="Italic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg></button>
+      <button class="tbtn" data-cmd="underline" title="Underline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v7a6 6 0 0 0 12 0V3"/><line x1="4" y1="21" x2="20" y2="21"/></svg></button>
+      <button class="tbtn" data-cmd="strikeThrough" title="Strikethrough"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="12" x2="20" y2="12"/><path d="M16 6.5C16 5 14.5 4 12 4S8 5 8 6.5M8 17.5C8 19 9.5 20 12 20s4-1 4-2.5"/></svg></button>
+      <div class="tsep"></div>
+      <button class="tbtn wide" data-cmd="formatBlock" data-val="H1" title="Headline">H1</button>
+      <button class="tbtn wide" data-cmd="formatBlock" data-val="H2" title="Sub-head">H2</button>
+      <button class="tbtn wide" data-cmd="formatBlock" data-val="P" title="Paragraph">P</button>
+      <div class="tsep"></div>
+      <button class="tbtn" data-cmd="insertUnorderedList" title="Bulleted list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1.4" fill="currentColor"/><circle cx="4" cy="12" r="1.4" fill="currentColor"/><circle cx="4" cy="18" r="1.4" fill="currentColor"/></svg></button>
+      <button class="tbtn" data-cmd="insertOrderedList" title="Numbered list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4M4 10h2M4 14h2v2H4v2h2" stroke-width="1.6"/></svg></button>
+      <div class="tsep"></div>
+      <button class="tbtn" data-cmd="justifyLeft" title="Align left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="14" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg></button>
+      <button class="tbtn" data-cmd="justifyCenter" title="Align center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="5" y1="18" x2="19" y2="18"/></svg></button>
+      <div class="tsep"></div>
+      <button class="tbtn" data-cmd="removeFormat" title="Clear formatting"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V5h14v2M9 5l-2 14M14 19h4"/><line x1="3" y1="3" x2="21" y2="21" stroke="var(--red)"/></svg></button>
+      <div class="spacer" style="flex:1"></div>
+      <button class="tbtn wide" id="loadStoryToEditor" title="Load the current passage">Load passage</button>
+    </div>
+
+    <div class="editor-grid">
+      <div class="editable" id="editable" contenteditable="true" spellcheck="true"><p>Start writing here, or load your passage from The Press Room. Try a sentence with mistakes, like: "i recieve alot of teh letters and i could of came sooner."</p></div>
+      <aside class="checkpane">
+        <div class="checkhead">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+          Editor
+          <span class="count" id="issueCount">0</span>
+        </div>
+        <div class="issues" id="issues">
+          <div class="clean">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <div>Press <b>Proof-read</b> to inspect your writing.</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="drill-foot" style="margin-top:14px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="proofBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+          Proof-read
+        </button>
+        <button class="btn ghost" id="aiProofBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3"/><circle cx="12" cy="12" r="3"/></svg>
+          Proof-read with A.I.
+        </button>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn ghost" id="saveTxt">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save .txt
+        </button>
+        <button class="btn red" id="saveHtml">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save formatted
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== IV. QUIZ ===================== -->
+  <section class="panel" id="quiz">
+    <p class="kicker">Test Your Comprehension</p>
+    <h2 class="headline">The Examination</h2>
+    <p class="standfirst">Bring your own Artificial Intelligence. Provide the key to any provider you favour, and the Gazette will set an examination drawn entirely from your passage.</p>
+
+    <div class="cfg">
+      <div class="checkhead" style="border:none;background:none;padding:0 0 10px">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Your A.I. Key
+      </div>
+      <div class="key-row">
+        <input type="password" id="apiKey" placeholder="Paste your API key, then Save">
+        <button class="btn red" id="saveKey">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save
+        </button>
+      </div>
+      <small class="note" id="keyStatus">Paste a key from OpenAI, Anthropic, Groq, or OpenRouter &mdash; the provider is detected automatically. Your key is stored only in this browser.</small>
+
+      <div id="modelBlock" style="margin-top:14px">
+        <label class="fld" for="model">Model</label>
+        <div class="model-row">
+          <select id="model"><option value="">— save your key to load models —</option></select>
+          <button class="btn ghost" id="refreshModels" type="button" title="Re-load the model list">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+            Detect
+          </button>
+        </div>
+        <small class="note" id="modelStatus">After you save a key, the Gazette lists the models that key can use.</small>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label class="fld" for="numQ">Questions</label>
+        <select id="numQ" style="width:120px">
+          <option selected>10</option><option>20</option><option>30</option><option>40</option><option>50</option>
+        </select>
+      </div>
+      <div>
+        <label class="fld" for="diff">Difficulty</label>
+        <select id="diff" style="width:160px">
+          <option value="easy">Easy</option>
+          <option value="medium" selected>Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn red" id="genQuiz">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+        Set the Examination
+      </button>
+    </div>
+    <div id="quizErr"></div>
+
+    <div class="col-rule"></div>
+    <div id="quizArea">
+      <p class="standfirst" style="color:var(--ink-faint)">No examination set. Paste your A.I. key above, press Save, then press <b>Set the Examination</b>.</p>
+    </div>
+  </section>
+
+  <footer>The Typing Gazette &middot; Printed in the Browser &middot; All Letters Reserved</footer>
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   THE TYPING GAZETTE  —  single-file app
+   ============================================================ */
+
+/* ---------- tiny helpers ---------- */
+const $ = (s,el=document)=>el.querySelector(s);
+const $$ = (s,el=document)=>[...el.querySelectorAll(s)];
+const escapeHtml = s => s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* safe storage (works locally, no-ops in restricted preview) */
+const store = {
+  get(k){ try{return localStorage.getItem(k)}catch(e){return null} },
+  set(k,v){ try{localStorage.setItem(k,v)}catch(e){} }
+};
+
+/* date line */
+$("#todayDate").textContent = new Date().toLocaleDateString('en-GB',
+  {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+/* ---------- tabs ---------- */
+function showTab(name){
+  $$("nav.sections button").forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+  $$(".panel").forEach(p=>p.classList.toggle('active',p.id===name));
+  if(name==='trainer') focusInput();
+}
+$$("nav.sections button").forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const state = {
+  sentences:[],
+  reps:3,
+  queue:[],
+  qi:0,
+  typed:"",
+  blocked:false,
+  lineStart:null,
+  soundOn:true,
+  session:{chars:0,errors:0,timeMs:0}
+};
+
+/* ============================================================
+   SAMPLES
+   ============================================================ */
+const SAMPLES = {
+  fox:"The quick brown fox jumps over the lazy dog. A wizard's job is to vex chumps quickly in fog. Pack my box with five dozen liquor jugs. How razorback jumping frogs can level six piqued gymnasts.",
+  city:"The city woke slowly under a pale grey sky. Bakers opened their shutters and the smell of warm bread drifted along the empty street. A tram rattled past the silent square. Pigeons scattered, then settled again on the old stone fountain. Soon the clerks would hurry by with their coats and their newspapers.",
+  letter:"My dear friend, I hope this letter finds you in good health. The winter here has been long and cold, and the river froze solid for three whole weeks. I think of our summer walks often. Please write when you can, and tell me everything about the harvest. Yours faithfully, Edward."
+};
+$$(".tag").forEach(t=>t.addEventListener('click',()=>{ $("#composeText").value = SAMPLES[t.dataset.sample]; }));
+
+/* ============================================================
+   FILE UPLOAD  (TXT / any text file + PDF via pdf.js)
+   ============================================================ */
+const PDFJS_URL='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+const PDFJS_WORKER='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+let pdfjsReady=null;
+function loadPdfJs(){
+  if(window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if(pdfjsReady) return pdfjsReady;
+  pdfjsReady=new Promise((resolve,reject)=>{
+    const s=document.createElement('script');
+    s.src=PDFJS_URL;
+    s.onload=()=>{ if(window.pdfjsLib){ window.pdfjsLib.GlobalWorkerOptions.workerSrc=PDFJS_WORKER; resolve(window.pdfjsLib); } else reject(new Error('pdf.js failed to load')); };
+    s.onerror=()=>reject(new Error('could not load pdf.js (offline or blocked)'));
+    document.head.appendChild(s);
+  });
+  return pdfjsReady;
+}
+async function extractPdf(file){
+  const lib=await loadPdfJs();
+  const buf=new Uint8Array(await file.arrayBuffer());
+  const pdf=await lib.getDocument({data:buf}).promise;
+  let out=[];
+  for(let i=1;i<=pdf.numPages;i++){
+    const page=await pdf.getPage(i);
+    const tc=await page.getTextContent();
+    out.push(tc.items.map(it=>it.str).join(' '));
+  }
+  return out.join('\n').replace(/\s+\n/g,'\n').trim();
+}
+function setUploadStatus(msg,isErr){
+  const el=$("#uploadStatus"); el.textContent=msg; el.classList.toggle('err',!!isErr);
+}
+$("#uploadBtn").addEventListener('click',()=>$("#fileInput").click());
+$("#fileInput").addEventListener('change',async e=>{
+  const file=e.target.files[0]; if(!file) return;
+  const ext=(file.name.split('.').pop()||'').toLowerCase();
+  setUploadStatus('Reading "'+file.name+'"...');
+  try{
+    let text='';
+    if(ext==='pdf' || file.type==='application/pdf'){
+      text=await extractPdf(file);
+    } else {
+      text=await file.text();
+    }
+    text=text.replace(/\u0000/g,'').trim();
+    if(!text){ setUploadStatus('No readable text found in that file.',true); return; }
+    $("#composeText").value=text;
+    const words=text.split(/\s+/).length;
+    setUploadStatus('Loaded '+words+' words from "'+file.name+'". Ready to drill, edit, or examine.');
+  }catch(err){
+    setUploadStatus('Could not read the file: '+err.message,true);
+  } finally { e.target.value=''; }
+});
+
+/* ============================================================
+   SENTENCE SPLITTING
+   ============================================================ */
+function splitSentences(text){
+  const clean = text.replace(/\s+/g,' ').trim();
+  if(!clean) return [];
+  // keep terminal punctuation with the sentence
+  const parts = clean.match(/[^.!?]+[.!?]*(\s|$)/g) || [clean];
+  return parts.map(s=>s.trim()).filter(s=>s.length>0);
+}
+
+/* ============================================================
+   SOUND  (Web Audio — soft typewriter tick)
+   ============================================================ */
+let audioCtx=null;
+function ensureAudio(){
+  if(!audioCtx){
+    try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
+  }
+  if(audioCtx && audioCtx.state==='suspended') audioCtx.resume();
+}
+function playTick(kind){
+  if(!state.soundOn || !audioCtx) return;
+  const t = audioCtx.currentTime;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  // soft, low, short — slight randomness so it feels organic
+  const base = kind==='space'?150: kind==='back'?120: 220;
+  o.type='triangle';
+  o.frequency.setValueAtTime(base + Math.random()*30, t);
+  o.frequency.exponentialRampToValueAtTime(base*0.6, t+0.05);
+  const peak = kind==='back'?0.018:0.05;
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.exponentialRampToValueAtTime(peak,t+0.004);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+0.06);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(t); o.stop(t+0.07);
+}
+
+/* sound toggle UI */
+const soundIcons = {
+  on:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>',
+  off:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></svg>'
+};
+function renderSoundToggle(){
+  $("#soundToggle").classList.toggle('on',state.soundOn);
+  $("#soundIcon").innerHTML = state.soundOn? soundIcons.on : soundIcons.off;
+}
+$("#soundToggle").addEventListener('click',()=>{
+  state.soundOn=!state.soundOn; store.set('tg_sound', state.soundOn?'1':'0'); renderSoundToggle();
+  if(state.soundOn){ ensureAudio(); playTick('key'); }
+});
+state.soundOn = store.get('tg_sound')!=='0';
+renderSoundToggle();
+
+/* ============================================================
+   TRAINER
+   ============================================================ */
+function buildQueue(){
+  state.queue=[];
+  state.sentences.forEach((s,si)=>{
+    for(let r=0;r<state.reps;r++) state.queue.push({text:s,sIndex:si,rep:r});
+  });
+  state.qi=0;
+  state.session={chars:0,errors:0,timeMs:0};
+}
+function currentDrill(){ return state.queue[state.qi]; }
+
+function startSession(){
+  const txt = $("#composeText").value;
+  state.reps = parseInt($("#repCount").value,10)||3;
+  state.sentences = splitSentences(txt);
+  if(state.sentences.length===0){ alert('Please enter a passage first.'); return; }
+  buildQueue();
+  $("#finishArea").classList.add('hidden');
+  $("#drillArea").classList.remove('hidden');
+  $("#trainerEmpty").style.display='none';
+  $("#sTotal").textContent = state.sentences.length;
+  loadDrill();
+  showTab('trainer');
+}
+
+function loadDrill(){
+  const d = currentDrill();
+  if(!d){ finishSession(); return; }
+  state.typed=""; state.blocked=false; state.lineStart=null;
+  clearBlocked();
+  if(typeInput) typeInput.value="";
+  $("#sIdx").textContent = d.sIndex+1;
+  // repetition dots for this sentence
+  const dots = [];
+  for(let r=0;r<state.reps;r++){
+    const cls = r<d.rep?'done': r===d.rep?'now':'';
+    dots.push(`<i class="${cls}"></i>`);
+  }
+  $("#repDots").innerHTML = dots.join('');
+  renderTarget();
+  updateStats();
+  focusInput();
+}
+
+function renderTarget(){
+  const d = currentDrill(); if(!d) return;
+  const target = d.text;
+  const pos = state.typed.length;   // cursor = next char to type (all chars so far are CORRECT)
+  let html="";
+  for(let i=0;i<target.length;i++){
+    const ch = target[i];
+    const safe = ch===' '? '&nbsp;' : escapeHtml(ch);
+    let cls;
+    if(i < pos)              cls='correct';
+    else if(i === pos)       cls='pending current'+(state.blocked?' blocked':'');
+    else                     cls='pending';
+    html += `<span class="${cls}">${safe}</span>`;
+  }
+  $("#target").innerHTML = html;
+}
+
+
+/* ---- focus ---- */
+const typeInput = $("#typeInput");
+function focusInput(){
+  if(!typeInput) return;
+  typeInput.removeAttribute('readonly');
+  typeInput.focus();
+  // second call helps stubborn mobile browsers
+  setTimeout(()=>typeInput.focus(), 100);
+}
+// click anywhere on the drill box also focuses the input
+$("#typebox").addEventListener('click', focusInput);
+// also focus when the tab becomes active
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) focusInput(); });
+
+/* ---- sound ---- */
+function handleKeySound(key){
+  ensureAudio();
+  if(key==='Backspace') playTick('back');
+  else if(key===' ')   playTick('space');
+  else                 playTick('key');
+}
+
+/* ---- shake feedback ---- */
+function shakeBox(){
+  const box=$("#typebox");
+  box.classList.add('blocked','shake');
+  setTimeout(()=>box.classList.remove('shake'),280);
+}
+function clearBlocked(){ $("#typebox").classList.remove('blocked'); }
+
+/* ---- core: process one character ---- */
+function processChar(ch){
+  const d=currentDrill(); if(!d) return;
+  const pos=state.typed.length;
+  if(pos>=d.text.length) return;
+  const expected=d.text[pos];
+  if(ch===expected){
+    state.blocked=false; clearBlocked();
+    if(state.lineStart===null) state.lineStart=performance.now();
+    state.typed+=ch;
+    handleKeySound(ch);
+    renderTarget(); updateStats();
+    if(state.typed.length===d.text.length) completeLine();
+  } else {
+    if(!state.blocked){ state.blocked=true; state.session.errors++; }
+    shakeBox();
+    renderTarget(); updateStats();
+    // revert the input value so the wrong char doesn't linger
+    if(typeInput) typeInput.value=state.typed;
+  }
+}
+function processBackspace(){
+  if(state.typed.length===0) return;
+  state.typed=state.typed.slice(0,-1);
+  state.blocked=false; clearBlocked();
+  handleKeySound('Backspace');
+  renderTarget(); updateStats();
+}
+
+/* ---- Desktop: keydown fires with real e.key ---- */
+let _keydownHandled=false;
+if(typeInput) typeInput.addEventListener('keydown',e=>{
+  _keydownHandled=false;
+  const d=currentDrill(); if(!d) return;
+  // Mobile virtual keyboards send 'Unidentified' → skip to input handler
+  if(e.key==='Unidentified'||e.key==='Process') return;
+
+  if(e.key==='Backspace'){
+    e.preventDefault(); _keydownHandled=true;
+    processBackspace();
+    typeInput.value=state.typed;
+    return;
+  }
+  const key=e.key==='Enter'?' ':e.key;
+  if(key.length!==1) return;
+  e.preventDefault(); _keydownHandled=true;
+  processChar(key);
+  typeInput.value=state.typed;
+},true);
+
+/* ---- Mobile / tablet: input event fires after virtual keyboard ---- */
+if(typeInput) typeInput.addEventListener('input',e=>{
+  if(_keydownHandled){ _keydownHandled=false; return; }
+  const d=currentDrill(); if(!d){ e.target.value=''; return; }
+  const val=e.target.value;
+  const prevLen=state.typed.length;
+
+  if(val.length>prevLen){
+    const added=val.slice(prevLen);
+    for(const ch of added) processChar(ch);
+  } else if(val.length<prevLen){
+    const times=prevLen-val.length;
+    for(let i=0;i<times;i++) processBackspace();
+  }
+  // always snap value to accepted typed string
+  e.target.value=state.typed;
+});
+
+function updateStats(){
+  // errors are accumulated directly in state.session.errors on each wrong keypress
+  const totalChars = state.session.chars + state.typed.length;
+  const totalErr   = state.session.errors;
+  const acc = totalChars>0 ? Math.max(0,Math.round((1-(totalErr/(totalChars+totalErr)))*100)) : 100;
+  let elapsed = state.session.timeMs;
+  if(state.lineStart!==null) elapsed += performance.now()-state.lineStart;
+  const minutes = elapsed/60000;
+  const wpm = minutes>0 ? Math.round((totalChars/5)/minutes) : 0;
+  $("#stWpm").textContent = wpm;
+  $("#stAcc").innerHTML = acc+'<small>%</small>';
+  $("#stErr").textContent = totalErr;
+}
+
+function completeLine(){
+  const d=currentDrill();
+  const lineTime = state.lineStart!==null? performance.now()-state.lineStart : 0;
+  state.session.chars += d.text.length;
+  state.session.timeMs += lineTime;
+  // errors already counted per-keypress
+  state.qi++;
+  setTimeout(loadDrill, 300);
+}
+
+$("#restartLine").addEventListener('click',()=>{
+  state.typed=""; state.blocked=false; state.lineStart=null;
+  if(typeInput) typeInput.value="";
+  clearBlocked(); renderTarget(); updateStats(); focusInput();
+});
+$("#skipLine").addEventListener('click',()=>{
+  const d=currentDrill(); if(!d) return;
+  state.session.chars += state.typed.length;
+  if(state.lineStart!==null) state.session.timeMs += performance.now()-state.lineStart;
+  state.qi++; loadDrill();
+});
+
+function finishSession(){
+  $("#drillArea").classList.add('hidden');
+  $("#finishArea").classList.remove('hidden');
+  const c=state.session.chars, er=state.session.errors;
+  const acc = c>0? Math.max(0,Math.round((1-er/(c+er))*100)) : 100;
+  const minutes = state.session.timeMs/60000;
+  const wpm = minutes>0? Math.round((c/5)/minutes):0;
+  $("#finWpm").textContent=wpm;
+  $("#finAcc").textContent=acc+'%';
+  $("#finErr").textContent=er;
+}
+
+$("#startBtn").addEventListener('click',startSession);
+$("#againBtn").addEventListener('click',()=>{ buildQueue(); $("#finishArea").classList.add('hidden'); $("#drillArea").classList.remove('hidden'); loadDrill(); });
+$("#toEditorBtn").addEventListener('click',()=>showTab('editor'));
+
+/* ============================================================
+   EDITOR  — formatting + proof-reading
+   ============================================================ */
+const editable = $("#editable");
+$("#toolbar").addEventListener('click',e=>{
+  const b=e.target.closest('.tbtn'); if(!b) return;
+  const cmd=b.dataset.cmd; if(!cmd) return;
+  editable.focus();
+  if(cmd==='formatBlock') document.execCommand('formatBlock',false,b.dataset.val);
+  else document.execCommand(cmd,false,null);
+});
+$("#loadStoryToEditor").addEventListener('click',()=>{
+  const txt=$("#composeText").value.trim();
+  if(!txt){ alert('No passage to load. Add one in The Press Room.'); return; }
+  const paras = txt.split(/\n{2,}|\.\s{2,}/).map(p=>p.trim()).filter(Boolean);
+  editable.innerHTML = (paras.length?paras:[txt]).map(p=>`<p>${escapeHtml(p)}</p>`).join('');
+});
+
+/* ----- offline proof-reader rules ----- */
+const MISSPELL = {
+  teh:'the', recieve:'receive', recieved:'received', adress:'address', occured:'occurred',
+  seperate:'separate', definately:'definitely', goverment:'government', untill:'until',
+  wich:'which', alot:'a lot', becuase:'because', freind:'friend', wierd:'weird',
+  thier:'their', acheive:'achieve', beleive:'believe', calender:'calendar', neccessary:'necessary',
+  occassion:'occasion', publically:'publicly', tommorow:'tomorrow', wanna:'want to', gonna:'going to',
+  alright:'all right', payed:'paid', truely:'truly', arguement:'argument', enviroment:'environment',
+  existance:'existence', grammer:'grammar', independant:'independent', maintainance:'maintenance',
+  millenium:'millennium', noticable:'noticeable', occurance:'occurrence', persistant:'persistent',
+  priviledge:'privilege', refered:'referred', relevent:'relevant', succesful:'successful', writting:'writing'
+};
+const VOWELS='aeiou';
+
+function proofread(text){
+  const issues=[];
+  const push=(type,msg,bad,good,index)=>issues.push({type,msg,bad,good,index});
+
+  // 1) misspellings + informal words (word-boundary, keep case)
+  const wordRe=/[A-Za-z']+/g; let m;
+  while((m=wordRe.exec(text))){
+    const w=m[0], lw=w.toLowerCase();
+    if(MISSPELL[lw]){
+      let good=MISSPELL[lw];
+      if(w[0]===w[0].toUpperCase()) good=good[0].toUpperCase()+good.slice(1);
+      push('Spelling',`"${w}" looks misspelled or informal.`,w,good,m.index);
+    }
+  }
+  // 2) repeated word ("the the")
+  const dup=/\b(\w+)\s+\1\b/gi; while((m=dup.exec(text))){
+    push('Repetition',`The word "${m[1]}" is repeated.`,m[0],m[1],m.index);
+  }
+  // 3) standalone lowercase "i"
+  const iRe=/(^|[^A-Za-z])i(?=[^A-Za-z]|$)/g;
+  while((m=iRe.exec(text))){
+    const at=m.index+m[1].length;
+    push('Grammar','The pronoun "i" should be capital "I".','i','I',at);
+  }
+  // 4) "could of / would of / should of"
+  const ofRe=/\b(could|would|should|must|might)\s+of\b/gi;
+  while((m=ofRe.exec(text))){
+    push('Grammar',`"${m[0]}" should use "have", not "of".`,m[0],m[1]+' have',m.index);
+  }
+  // 5) a / an before vowel sound
+  const anRe=/\b(a|an)\s+([A-Za-z]+)/g;
+  while((m=anRe.exec(text))){
+    const art=m[1], next=m[2], starts=VOWELS.includes(next[0].toLowerCase());
+    if(art.toLowerCase()==='a' && starts && !/^(uni|use|user|eu|one)/i.test(next))
+      push('Grammar',`Use "an" before "${next}".`,m[0],'an '+next,m.index);
+    if(art.toLowerCase()==='an' && !starts)
+      push('Grammar',`Use "a" before "${next}".`,m[0],'a '+next,m.index);
+  }
+  // 6) double spaces
+  const dsp=/ {2,}/g; while((m=dsp.exec(text))){
+    push('Spacing','Multiple spaces — collapse to one.','␣␣',' ',m.index);
+  }
+  // 7) missing space after punctuation
+  const psp=/[,.;:!?]([A-Za-z])/g; while((m=psp.exec(text))){
+    push('Spacing','Add a space after punctuation.',m[0],m[0][0]+' '+m[1],m.index);
+  }
+  // 8) sentence not starting with capital
+  const sentRe=/(^|[.!?]\s+)([a-z])/g; while((m=sentRe.exec(text))){
+    const at=m.index+m[1].length;
+    push('Style','Begin a sentence with a capital letter.',m[2],m[2].toUpperCase(),at);
+  }
+  // dedupe by index+bad
+  const seen=new Set();
+  return issues.filter(i=>{const k=i.index+'|'+i.bad+'|'+i.type; if(seen.has(k))return false; seen.add(k); return true;})
+               .sort((a,b)=>a.index-b.index);
+}
+
+function renderIssues(issues, viaAI){
+  const box=$("#issues"); $("#issueCount").textContent=issues.length;
+  if(issues.length===0){
+    box.innerHTML=`<div class="clean">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <div>${viaAI?'The Artificial Examiner found nothing to correct.':'No issues found. Clean copy!'}</div></div>`;
+    return;
+  }
+  box.innerHTML = issues.map((it,i)=>`
+    <div class="issue" data-i="${i}">
+      <span class="type">${escapeHtml(it.type)}</span>
+      <div class="msg">${escapeHtml(it.msg)}</div>
+      <span class="ctx"><del>${escapeHtml(it.bad)}</del> &rarr; <ins>${escapeHtml(it.good)}</ins></span>
+      <button class="btn red apply" data-bad="${escapeHtml(it.bad)}" data-good="${escapeHtml(it.good)}">Apply fix</button>
+    </div>`).join('');
+}
+
+/* apply a fix by replacing first matching occurrence in editor text */
+$("#issues").addEventListener('click',e=>{
+  const b=e.target.closest('.apply'); if(!b) return;
+  const bad=b.dataset.bad.replace('␣␣','  '), good=b.dataset.good;
+  // operate on plain text content, rebuild as single paragraph-preserving replace
+  const walk = node=>{
+    if(node.nodeType===3){
+      const idx=node.nodeValue.indexOf(bad);
+      if(idx>=0){ node.nodeValue = node.nodeValue.replace(bad,good); return true; }
+    } else {
+      for(const c of [...node.childNodes]) if(walk(c)) return true;
+    }
+    return false;
+  };
+  walk(editable);
+  // re-run proofread
+  $("#proofBtn").click();
+});
+
+$("#proofBtn").addEventListener('click',()=>{
+  const text = editable.innerText;
+  renderIssues(proofread(text), false);
+});
+
+/* ----- AI proof-reading ----- */
+$("#aiProofBtn").addEventListener('click',async()=>{
+  const cfg=getAIConfig(); if(!validateCfg(cfg,'#issues',true)) return;
+  const text=editable.innerText.trim();
+  if(!text){ return; }
+  const box=$("#issues");
+  box.innerHTML=`<div class="clean"><span class="loader" style="border-color:var(--red);border-top-color:transparent"></span><div style="margin-top:10px">The Artificial Examiner is reading...</div></div>`;
+  const prompt=`You are a strict English proof-reader. Find spelling, grammar, punctuation and style problems in the TEXT.
+Return ONLY raw JSON, no markdown, in this shape:
+{"issues":[{"type":"Spelling|Grammar|Punctuation|Style","msg":"short explanation","bad":"exact substring from text","good":"corrected substring"}]}
+The "bad" value MUST be an exact substring copied from the text so it can be replaced. Keep it short. If there are no problems, return {"issues":[]}.
+TEXT:
+"""${text}"""`;
+  try{
+    const out=await callAI(cfg,prompt);
+    const data=parseJSON(out);
+    const issues=(data.issues||[]).map(it=>({type:it.type||'Note',msg:it.msg||'',bad:it.bad||'',good:it.good||'',index:0})).filter(it=>it.bad);
+    renderIssues(issues,true);
+  }catch(err){
+    box.innerHTML=`<div class="errbox">A.I. error: ${escapeHtml(err.message)}</div>`;
+  }
+});
+
+/* ----- save ----- */
+function download(filename, content, mime){
+  const blob=new Blob([content],{type:mime});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},100);
+}
+$("#saveTxt").addEventListener('click',()=>download('gazette-document.txt', editable.innerText, 'text/plain;charset=utf-8'));
+$("#saveHtml").addEventListener('click',()=>{
+  const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Document</title>
+<style>body{font-family:Georgia,serif;max-width:740px;margin:40px auto;line-height:1.7;color:#1f1d18}h1,h2{font-family:Georgia,serif}</style>
+</head><body>${editable.innerHTML}</body></html>`;
+  download('gazette-document.html', html, 'text/html;charset=utf-8');
+});
+
+/* ============================================================
+   AI CONFIG + CALLS
+   ============================================================ */
+const PROVIDER_DEFAULTS={
+  openai:{base:'https://api.openai.com/v1',model:'gpt-4o-mini',label:'OpenAI'},
+  openrouter:{base:'https://openrouter.ai/api/v1',model:'openai/gpt-4o-mini',label:'OpenRouter'},
+  groq:{base:'https://api.groq.com/openai/v1',model:'llama-3.3-70b-versatile',label:'Groq'},
+  anthropic:{base:'https://api.anthropic.com/v1',model:'claude-3-5-haiku-20241022',label:'Anthropic'}
+};
+/* detect provider from the shape of the key */
+function cleanKey(k){
+  // strip anything that is not a visible ASCII character:
+  // removes spaces, tabs, newlines, zero-width chars, RTL/LTR marks and any
+  // non Latin-1 code points that break HTTP header encoding on mobile pastes.
+  return (k||'').replace(/[^\x21-\x7E]/g,'');
+}
+function detectProvider(key){
+  if(/^sk-ant-/.test(key)) return 'anthropic';
+  if(/^sk-or-/.test(key))  return 'openrouter';
+  if(/^gsk_/.test(key))    return 'groq';
+  return 'openai'; // sk-..., sk-proj-..., and anything else => OpenAI-compatible
+}
+function getAIConfig(){
+  const key=cleanKey($("#apiKey").value);
+  const p=detectProvider(key), d=PROVIDER_DEFAULTS[p];
+  const chosen=$("#model").value.trim();
+  return {provider:p, base:d.base, model:chosen||d.model, key};
+}
+function updateKeyStatus(saved){
+  const el=$("#keyStatus"); const key=cleanKey($("#apiKey").value);
+  if(!key){ el.innerHTML='Paste a key from OpenAI, Anthropic, Groq, or OpenRouter &mdash; the provider is detected automatically. Your key is stored only in this browser.'; return; }
+  const lbl=PROVIDER_DEFAULTS[detectProvider(key)].label;
+  el.innerHTML = saved
+    ? `Saved. Detected provider: <b>${lbl}</b>.`
+    : `Detected provider: <b>${lbl}</b>. Press Save to keep it in this browser.`;
+}
+function saveCfg(){ store.set('tg_key', cleanKey($("#apiKey").value)); store.set('tg_model', $("#model").value.trim()); }
+
+/* ---- model discovery ---- */
+const FALLBACK_MODELS={
+  openai:['gpt-4o-mini','gpt-4o','gpt-4.1-mini','gpt-4.1','o4-mini','o3-mini'],
+  groq:['llama-3.3-70b-versatile','llama-3.1-8b-instant','meta-llama/llama-4-scout-17b-16e-instruct','gemma2-9b-it','mixtral-8x7b-32768'],
+  openrouter:['openai/gpt-4o-mini','anthropic/claude-3.5-sonnet','google/gemini-flash-1.5','meta-llama/llama-3.3-70b-instruct','mistralai/mistral-small'],
+  anthropic:['claude-3-5-sonnet-20241022','claude-3-5-haiku-20241022','claude-3-opus-20240229','claude-3-haiku-20240307']
+};
+function isChatModel(id){
+  const x=id.toLowerCase();
+  return !/embedding|whisper|tts|audio|dall-?e|image|moderation|search|realtime|transcribe|babbage|ada-|curie|davinci|guard|distil-whisper/.test(x);
+}
+function populateModelSelect(models, preferred){
+  const sel=$("#model"); sel.innerHTML='';
+  models.forEach(id=>{
+    const o=document.createElement('option'); o.value=id; o.textContent=id; sel.appendChild(o);
+  });
+  // choose: stored preference -> provider default -> first
+  let pick = (preferred && models.includes(preferred)) ? preferred : null;
+  if(!pick){ const def=PROVIDER_DEFAULTS[detectProvider(cleanKey($("#apiKey").value))].model; if(models.includes(def)) pick=def; }
+  if(!pick) pick=models[0];
+  sel.value=pick;
+}
+async function fetchModels(){
+  const cfg=getAIConfig();
+  const ms=$("#modelStatus");
+  if(!cfg.key){ ms.textContent='Save a key first to load its models.'; return; }
+  ms.innerHTML='<span class="loader" style="border-color:var(--ink);border-top-color:transparent;width:13px;height:13px"></span> Loading models for this key...';
+  const stored=store.get('tg_model')||'';
+  try{
+    let url, headers;
+    if(cfg.provider==='anthropic'){
+      url=cfg.base+'/models';
+      headers={'x-api-key':cfg.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'};
+    } else {
+      url=cfg.base+'/models';
+      headers={'Authorization':'Bearer '+cfg.key};
+    }
+    const res=await fetch(url,{headers});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    let ids=(data.data||data.models||[]).map(m=>m.id||m.name||m).filter(Boolean);
+    ids=[...new Set(ids)].filter(isChatModel).sort((a,b)=>a.localeCompare(b));
+    if(!ids.length) throw new Error('empty list');
+    populateModelSelect(ids, stored);
+    ms.innerHTML=`Found <b>${ids.length}</b> models for this key. Pick the one you want.`;
+  }catch(err){
+    const fb=FALLBACK_MODELS[cfg.provider]||FALLBACK_MODELS.openai;
+    populateModelSelect(fb, stored);
+    ms.innerHTML=`Could not fetch the live list (${escapeHtml(err.message)}). Showing common ${PROVIDER_DEFAULTS[cfg.provider].label} models &mdash; you can still pick one.`;
+  }
+}
+function loadCfg(){
+  const k=store.get('tg_key'); if(k) $("#apiKey").value=k;
+  updateKeyStatus(!!k);
+  if(k){ fetchModels(); } // auto-load on start if a key is saved
+}
+$("#saveKey").addEventListener('click',()=>{ const c=cleanKey($("#apiKey").value); $("#apiKey").value=c; saveCfg(); updateKeyStatus(true); fetchModels(); });
+$("#refreshModels").addEventListener('click',fetchModels);
+$("#model").addEventListener('change',()=>{ store.set('tg_model',$("#model").value.trim()); });
+$("#apiKey").addEventListener('input',()=>updateKeyStatus(false));
+function validateCfg(cfg, errSel, inline){
+  if(!cfg.key){
+    const msg='Please paste your A.I. API key in the Examination section and press Save.';
+    if(inline){ const box=$(errSel); if(box) box.innerHTML=`<div class="errbox">${msg}</div>`; }
+    else { showQuizErr(msg); }
+    return false;
+  }
+  return true;
+}
+
+/* OpenAI-compatible + Anthropic */
+async function callAI(cfg, userPrompt, systemPrompt){
+  if(cfg.provider==='anthropic'){
+    const res=await fetch(cfg.base+'/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':cfg.key,
+        'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:cfg.model,max_tokens:8000,
+        system:systemPrompt||'You are a helpful, precise assistant.',
+        messages:[{role:'user',content:userPrompt}]})
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status+' '+(await safeText(res)));
+    const data=await res.json();
+    return (data.content||[]).map(b=>b.text||'').join('\n');
+  } else {
+    const res=await fetch(cfg.base+'/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+cfg.key},
+      body:JSON.stringify({model:cfg.model,temperature:0.4,
+        messages:[{role:'system',content:systemPrompt||'You are a helpful, precise assistant.'},
+                  {role:'user',content:userPrompt}]})
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status+' '+(await safeText(res)));
+    const data=await res.json();
+    return data.choices?.[0]?.message?.content || '';
+  }
+}
+async function safeText(res){ try{return (await res.text()).slice(0,200)}catch(e){return ''} }
+function parseJSON(s){
+  let t=s.trim().replace(/^```(json)?/i,'').replace(/```$/,'').trim();
+  const a=t.indexOf('{'), b=t.lastIndexOf('}');
+  if(a>=0&&b>=0) t=t.slice(a,b+1);
+  return JSON.parse(t);
+}
+
+/* ============================================================
+   QUIZ
+   ============================================================ */
+function showQuizErr(msg){ $("#quizErr").innerHTML=`<div class="errbox">${escapeHtml(msg)}</div>`; }
+let currentQuiz=null;
+
+$("#genQuiz").addEventListener('click',async()=>{
+  $("#quizErr").innerHTML='';
+  const cfg=getAIConfig(); if(!validateCfg(cfg)) return;
+  const passage=$("#composeText").value.trim();
+  if(!passage){ showQuizErr('Set a passage in The Press Room first (paste text or upload a file).'); return; }
+  const src = passage.length>8000 ? passage.slice(0,8000) : passage;
+  const n=$("#numQ").value, diff=$("#diff").value;
+  const area=$("#quizArea");
+  area.innerHTML=`<div class="clean" style="border:1px solid var(--rule)"><span class="loader" style="border-color:var(--red);border-top-color:transparent"></span><div style="margin-top:10px">The Examiner is preparing ${n} questions...</div></div>`;
+  const btn=$("#genQuiz"); btn.disabled=true; const old=btn.innerHTML; btn.innerHTML='<span class="loader"></span> Setting...';
+
+  const prompt=`Create an English exam based ONLY on the passage below. Difficulty: ${diff}. Produce EXACTLY ${n} questions.
+Use a balanced MIX of these five types (include several of each when the count allows):
+- "mcq": reading-comprehension question, 4 options, exactly one correct ("choose the correct answer").
+- "tf": a true/false statement about the passage.
+- "grammar": test one grammar point using words/sentences from the passage; give 4 options where only one is grammatically correct.
+- "write": ask the learner to WRITE something (use a word from the passage in a sentence, rewrite a sentence, or answer in their own words); also provide a good model answer.
+- "speak": pick one exact sentence FROM THE PASSAGE for the learner to read aloud; put that exact sentence in "q"; give a short pronunciation tip in "explanation".
+Everything must come strictly from the passage content.
+Return ONLY raw JSON (no markdown, no commentary) in this exact shape:
+{"questions":[
+  {"type":"mcq","q":"...","options":["A","B","C","D"],"answer":0,"explanation":"..."},
+  {"type":"tf","q":"...","answer":true,"explanation":"..."},
+  {"type":"grammar","q":"...","options":["A","B","C","D"],"answer":2,"explanation":"..."},
+  {"type":"write","q":"...","answer":"model answer","explanation":"..."},
+  {"type":"speak","q":"a sentence copied from the passage","explanation":"pronunciation tip"}
+]}
+For "mcq" and "grammar", "answer" is the index (0-3) of the correct option. For "tf", "answer" is true or false.
+PASSAGE:
+"""${src}"""`;
+
+  try{
+    const out=await callAI(cfg,prompt,'You are a meticulous English examiner. Output valid JSON only.');
+    const data=parseJSON(out);
+    currentQuiz=data.questions||[];
+    renderQuiz(currentQuiz);
+  }catch(err){
+    area.innerHTML='';
+    showQuizErr('Could not generate the exam: '+err.message+'  (Some providers block direct browser calls — try OpenRouter/Groq, or run this file locally.)');
+  }finally{ btn.disabled=false; btn.innerHTML=old; }
+});
+
+const TYPE_LABEL={mcq:'Multiple Choice',tf:'True / False',grammar:'Grammar',write:'Writing',speak:'Pronunciation',short:'Writing'};
+
+function renderQuiz(qs){
+  const area=$("#quizArea");
+  if(!qs.length){ area.innerHTML='<p class="standfirst">The examiner returned no questions. Try again.</p>'; return; }
+  let html='';
+  qs.forEach((q,i)=>{
+    const label=TYPE_LABEL[q.type]||q.type.toUpperCase();
+    html+=`<div class="q" data-i="${i}" data-type="${q.type}"><div class="qno">Question ${i+1} &middot; ${label}</div>`;
+    if(q.type==='mcq' || q.type==='grammar'){
+      html+=`<div class="qtext">${escapeHtml(q.q||'')}</div>`;
+      (q.options||[]).forEach((o,oi)=>{
+        html+=`<label class="opt"><input type="radio" name="q${i}" value="${oi}"><span>${escapeHtml(o)}</span></label>`;
+      });
+    } else if(q.type==='tf'){
+      html+=`<div class="qtext">${escapeHtml(q.q||'')}</div>`;
+      ['True','False'].forEach((o,oi)=>{
+        html+=`<label class="opt"><input type="radio" name="q${i}" value="${oi===0}"><span>${o}</span></label>`;
+      });
+    } else if(q.type==='speak'){
+      html+=`<div class="qtext">Read this sentence aloud, then practise your pronunciation:</div>`;
+      html+=`<div class="speak-card">
+        <div class="speak-sentence">${escapeHtml(q.q||'')}</div>
+        <button class="btn small speak-listen" data-i="${i}" type="button">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+          Listen</button>
+        <button class="btn small ghost speak-practice" data-i="${i}" type="button">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4"/></svg>
+          Practice</button>
+        <div class="speak-result"></div>
+      </div>`;
+    } else { /* write / short */
+      html+=`<div class="qtext">${escapeHtml(q.q||'')}</div>`;
+      html+=`<textarea placeholder="Write your answer..."></textarea>`;
+      html+=`<div class="write-actions">
+        <button class="btn small write-grade" data-i="${i}" type="button">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="3"/></svg>
+          Check with A.I.</button>
+      </div>`;
+      html+=`<div class="feedback"></div>`;
+      html+=`<div class="model"><b>Model answer:</b> ${escapeHtml(q.answer||'')}</div>`;
+    }
+    html+=`<div class="explain">${escapeHtml(q.explanation||'')}</div></div>`;
+  });
+  html+=`<div style="text-align:center;margin:10px 0 4px"><button class="btn red" id="gradeBtn">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    Mark the Examination</button></div>`;
+  area.innerHTML='<div id="scoreSlot"></div>'+html;
+  $("#gradeBtn").addEventListener('click',gradeQuiz);
+}
+
+function gradeQuiz(){
+  let auto=0, autoTotal=0;
+  currentQuiz.forEach((q,i)=>{
+    const card=$(`.q[data-i="${i}"]`); card.classList.add('graded');
+    if(q.type==='mcq' || q.type==='grammar'){
+      autoTotal++;
+      const ans=parseInt(q.answer,10);
+      const sel=$(`input[name="q${i}"]:checked`);
+      const opts=$$('.opt',card);
+      opts.forEach((o,oi)=>{ if(oi===ans) o.classList.add('correct'); });
+      if(sel){ const v=parseInt(sel.value,10);
+        if(v===ans) auto++; else opts[v]?.classList.add('wrong'); }
+    } else if(q.type==='tf'){
+      autoTotal++;
+      const sel=$(`input[name="q${i}"]:checked`);
+      const opts=$$('.opt',card);
+      const correctIdx = (q.answer===true||q.answer==='true')?0:1;
+      opts[correctIdx]?.classList.add('correct');
+      if(sel){ const v=(sel.value==='true'); if(v===(correctIdx===0)) auto++; else opts[correctIdx===0?1:0]?.classList.add('wrong'); }
+    }
+    // write/speak: revealed for self-review (write can be A.I.-graded individually)
+  });
+  const pct=autoTotal?Math.round(auto/autoTotal*100):0;
+  $("#scoreSlot").innerHTML=`<div class="scorecard">
+    <p class="kicker">Result</p>
+    <div class="pct">${auto}/${autoTotal}</div>
+    <p style="margin:4px 0 0">auto-graded score &middot; <b>${pct}%</b><br>
+    <small style="color:var(--ink-faint)">Writing &amp; pronunciation are practised separately &mdash; use <b>Check with A.I.</b> and <b>Listen / Practice</b> on those questions.</small></p>
+  </div>`;
+  $("#scoreSlot").scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+/* ---- pronunciation: text-to-speech + speech recognition ---- */
+function speakText(text){
+  if(!('speechSynthesis' in window)){ alert('Your browser does not support speech synthesis.'); return; }
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='en-US'; u.rate=0.9; u.pitch=1;
+  const v=(speechSynthesis.getVoices()||[]).find(v=>/^en[-_]/i.test(v.lang));
+  if(v) u.voice=v;
+  speechSynthesis.speak(u);
+}
+function normSpeech(s){ return (s||'').toLowerCase().replace(/[^a-z0-9\s']/g,' ').replace(/\s+/g,' ').trim(); }
+function pronScore(target, said){
+  const t=normSpeech(target).split(' ').filter(Boolean);
+  const set=new Set(normSpeech(said).split(' ').filter(Boolean));
+  if(!t.length) return 0;
+  let hit=0; t.forEach(w=>{ if(set.has(w)) hit++; });
+  return Math.round(hit/t.length*100);
+}
+/* ---- simple syllable splitter for visual guide ---- */
+function syllabify(word){
+  // basic rules: split on vowel-consonant-vowel boundaries
+  return word.replace(/([aeiouAEIOU])([^aeiouAEIOU\s])([aeiouAEIOU])/g,'$1·$2$3')
+             .replace(/([^aeiouAEIOU\s]{2,})([aeiouAEIOU])/g,(m,c,v)=>c.slice(0,-1)+'·'+c.slice(-1)+v);
+}
+function buildPhoneticGuide(sentence){
+  const words = sentence.split(/(\s+)/);
+  return words.map(w=>{
+    if(/^\s+$/.test(w)) return ' ';
+    const clean = w.replace(/[^a-zA-Z']/g,'');
+    const punc  = w.replace(/[a-zA-Z']/g,'');
+    if(!clean) return escapeHtml(w);
+    const syl = syllabify(clean);
+    return `<span class="pword" title="${escapeHtml(syl)}">${escapeHtml(clean)}</span>${escapeHtml(punc)}`;
+  }).join('');
+}
+
+/* ---- permission check then listen ---- */
+async function requestMicPermission(){
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    // immediately stop — we only needed the permission grant
+    stream.getTracks().forEach(t=>t.stop());
+    return true;
+  } catch(err){
+    return false;
+  }
+}
+
+function practicePronunciation(i){
+  const card=$(`.q[data-i="${i}"]`);
+  const resEl=$('.speak-result', card);
+  const sentence = currentQuiz[i].q || '';
+
+  /* ---- no Speech Recognition API ---- */
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){
+    resEl.classList.add('show');
+    resEl.innerHTML =
+      `<b>Speech recognition is not supported in this browser.</b><br>
+       Try <b>Google Chrome</b> on desktop or Android for full pronunciation practice.<br>
+       Meanwhile, tap <b>Listen</b> to hear the sentence, then repeat it aloud.<br>
+       <div class="phon-guide">Syllable guide: ${buildPhoneticGuide(sentence)}</div>`;
+    return;
+  }
+
+  /* ---- request microphone permission first ---- */
+  resEl.classList.add('show');
+  resEl.innerHTML = '<span class="loader" style="border-color:var(--ink);border-top-color:transparent;width:13px;height:13px"></span> Requesting microphone access…';
+
+  requestMicPermission().then(granted=>{
+    if(!granted){
+      resEl.innerHTML =
+        `<b>Microphone access was denied.</b> To fix this:<br>
+         &bull; <b>Chrome on Android:</b> tap the lock icon 🔒 in the address bar → Site settings → Microphone → Allow<br>
+         &bull; <b>Local file (file://):</b> open <code>chrome://settings/content/microphone</code> and add an exception for <code>file://</code><br>
+         &bull; <b>Or:</b> use the <b>Listen</b> button to hear the sentence and practise by repeating aloud.<br>
+         <div class="phon-guide">Syllable guide: ${buildPhoneticGuide(sentence)}</div>`;
+      return;
+    }
+
+    /* ---- permission granted — start recognition ---- */
+    const rec = new SR();
+    rec.lang = 'en-US';
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+
+    resEl.innerHTML = '<span class="loader" style="border-color:var(--red);border-top-color:transparent;width:13px;height:13px"></span> <b>Listening…</b> speak the sentence now.';
+
+    rec.onresult = ev => {
+      const said  = ev.results[0][0].transcript;
+      const conf  = Math.round((ev.results[0][0].confidence||0)*100);
+      const score = pronScore(sentence, said);
+      resEl.classList.toggle('low', score < 70);
+      resEl.innerHTML =
+        `You said: <i>"${escapeHtml(said)}"</i><br>
+         Word match: <b>${score}%</b>${conf?' &middot; Confidence: '+conf+'%':''}<br>
+         <div class="phon-guide">Syllable guide: ${buildPhoneticGuide(sentence)}</div>`;
+    };
+
+    rec.onerror = ev => {
+      if(ev.error === 'not-allowed' || ev.error === 'service-not-allowed'){
+        resEl.innerHTML =
+          `<b>Microphone blocked.</b><br>
+           &bull; <b>Chrome on Android:</b> tap the lock 🔒 in the address bar → Microphone → Allow, then refresh.<br>
+           &bull; <b>Running as a local file?</b> Chrome blocks mic on <code>file://</code>. Open <code>chrome://flags</code>, search <i>file access</i>, enable it.<br>
+           &bull; Or use <b>Firefox</b> which allows mic on local files.<br>
+           <div class="phon-guide">Syllable guide: ${buildPhoneticGuide(sentence)}</div>`;
+      } else if(ev.error === 'no-speech'){
+        resEl.textContent = 'No speech detected. Tap Practice again and speak clearly.';
+      } else if(ev.error === 'network'){
+        resEl.innerHTML =
+          `<b>Network error</b> — speech recognition needs an internet connection.<br>
+           <div class="phon-guide">Syllable guide: ${buildPhoneticGuide(sentence)}</div>`;
+      } else {
+        resEl.innerHTML =
+          `Could not hear you (${escapeHtml(ev.error)}).<br>
+           <div class="phon-guide">Syllable guide: ${buildPhoneticGuide(sentence)}</div>`;
+      }
+    };
+
+    rec.start();
+  });
+}
+async function gradeWriting(i, btn){
+  const cfg=getAIConfig();
+  const card=$(`.q[data-i="${i}"]`); const ta=$('textarea',card);
+  const ans=(ta?ta.value:'').trim(); const fb=$('.feedback',card);
+  card.classList.add('graded'); // reveal model answer either way
+  if(!ans){ fb.classList.add('show'); fb.innerHTML='Write an answer first, then I will grade it.'; return; }
+  if(!cfg.key){ fb.classList.add('show'); fb.innerHTML='Save your A.I. key to grade writing. Meanwhile, compare with the model answer below.'; return; }
+  fb.classList.add('show'); fb.innerHTML='<span class="loader" style="border-color:var(--ink);border-top-color:transparent;width:13px;height:13px"></span> The examiner is reading your answer...';
+  btn.disabled=true;
+  const q=currentQuiz[i];
+  const prompt=`You are an English writing examiner. Question: "${q.q}". Model answer: "${q.answer||''}". The learner wrote: "${ans}".
+Grade the learner's answer from 0 to 100 for correctness, grammar and relevance, then give ONE short sentence of feedback.
+Return ONLY raw JSON: {"score": <number 0-100>, "feedback": "<one sentence>"}`;
+  try{
+    const out=await callAI(cfg,prompt,'Output valid JSON only.');
+    const d=parseJSON(out);
+    const sc=Math.max(0,Math.min(100,parseInt(d.score,10)||0));
+    fb.innerHTML=`<span class="score">${sc}/100</span> &mdash; ${escapeHtml(d.feedback||'')}`;
+  }catch(err){
+    fb.innerHTML='Could not grade ('+escapeHtml(err.message)+'). Compare with the model answer below.';
+  } finally { btn.disabled=false; }
+}
+/* one delegated listener for all quiz action buttons */
+$("#quizArea").addEventListener('click',e=>{
+  const listen=e.target.closest('.speak-listen');
+  const practice=e.target.closest('.speak-practice');
+  const grade=e.target.closest('.write-grade');
+  if(listen){ speakText(currentQuiz[+listen.dataset.i].q); }
+  else if(practice){ practicePronunciation(+practice.dataset.i); }
+  else if(grade){ gradeWriting(+grade.dataset.i, grade); }
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+loadCfg();
+</script>
+</body>
+</html>
