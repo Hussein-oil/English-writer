@@ -13,8 +13,6 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
 const TABS = ['YouTube Link', 'Upload File', 'Paste Text']
 const PREVIEW_LENGTH = 300
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 function extractVideoId(url) {
   const match = url.match(
     /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
@@ -27,9 +25,7 @@ async function fetchTranscript(videoId) {
     `http://localhost:3001/api/transcript?videoId=${videoId}`,
     { timeout: 20000 }
   )
-  if (!res.data.success) {
-    throw new Error(res.data.error || 'Failed to fetch transcript.')
-  }
+  if (!res.data.success) throw new Error(res.data.error || 'Failed to fetch transcript.')
   const lang = res.data.warning ? 'auto' : (res.data.lang || 'en')
   const text = res.data.fullText || res.data.text || ''
   const minutes = Array.isArray(res.data.minutes) ? res.data.minutes : []
@@ -57,7 +53,12 @@ async function readPdfFile(file) {
   return pages.join('\n').replace(/\s+/g, ' ').trim()
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+function getCharInfo(len) {
+  if (len === 0) return { color: 'var(--text-muted)', label: '' }
+  if (len < 500) return { color: 'var(--warning)', label: 'Text might be too short' }
+  if (len <= 10000) return { color: 'var(--success)', label: 'Good length' }
+  return { color: '#60a5fa', label: 'Long text — will be analyzed in parts' }
+}
 
 export default function Input() {
   const navigate = useNavigate()
@@ -65,15 +66,14 @@ export default function Input() {
 
   const [activeTab, setActiveTab] = useState(0)
 
-  // YouTube state
   const [ytUrl, setYtUrl] = useState('')
   const [ytLoading, setYtLoading] = useState(false)
   const [ytError, setYtError] = useState('')
   const [ytText, setYtText] = useState('')
   const [ytLang, setYtLang] = useState('')
   const [ytMinutes, setYtMinutes] = useState([])
+  const [urlFocused, setUrlFocused] = useState(false)
 
-  // File upload state
   const [fileText, setFileText] = useState('')
   const [fileName, setFileName] = useState('')
   const [fileLoading, setFileLoading] = useState(false)
@@ -81,13 +81,15 @@ export default function Input() {
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef(null)
 
-  // Paste state
   const [pasteText, setPasteText] = useState('')
+  const [textareaFocused, setTextareaFocused] = useState(false)
 
   const currentText = [ytText, fileText, pasteText][activeTab]
   const hasText = currentText.trim().length > 0
 
-  // ── YouTube ───────────────────────────────────────────────────────────────
+  const ytUrlTrimmed = ytUrl.trim()
+  const ytUrlValid = ytUrlTrimmed && extractVideoId(ytUrlTrimmed) !== null
+  const ytUrlInvalid = ytUrlTrimmed && !ytUrlValid
 
   async function handleExtractTranscript() {
     setYtError('')
@@ -110,19 +112,15 @@ export default function Input() {
     }
   }
 
-  // ── File upload ───────────────────────────────────────────────────────────
-
   async function processFile(file) {
     setFileError('')
     setFileText('')
     setFileName('')
-
     const ext = file.name.split('.').pop().toLowerCase()
     if (!['txt', 'pdf'].includes(ext)) {
       setFileError('Only .txt and .pdf files are supported.')
       return
     }
-
     setFileLoading(true)
     try {
       const text = ext === 'pdf' ? await readPdfFile(file) : await readTxtFile(file)
@@ -162,8 +160,6 @@ export default function Input() {
     e.target.value = ''
   }
 
-  // ── Analyze ───────────────────────────────────────────────────────────────
-
   function handleAnalyze() {
     const text = currentText.trim()
     if (!text) return
@@ -172,14 +168,10 @@ export default function Input() {
     navigate('/analysis')
   }
 
-  // ── Reset current tab ─────────────────────────────────────────────────────
-
-  function handleTabChange(idx) {
-    setActiveTab(idx)
-  }
+  const charInfo = getCharInfo(pasteText.length)
 
   return (
-    <div style={styles.page}>
+    <div style={styles.page} className="page-enter">
       <Navbar />
 
       <main style={styles.main}>
@@ -188,16 +180,24 @@ export default function Input() {
           <p style={styles.desc}>Choose how you want to provide the English content to analyze.</p>
         </div>
 
-        {/* Tab bar */}
+        {/* Tab bar with sliding indicator */}
         <div style={styles.tabBar}>
+          <div
+            style={{
+              ...styles.tabIndicator,
+              left: `calc(${activeTab} * (100% - 10px) / 3 + 5px)`,
+            }}
+          />
           {TABS.map((tab, i) => (
             <button
               key={tab}
               style={{
                 ...styles.tabBtn,
                 ...(activeTab === i ? styles.tabBtnActive : {}),
+                position: 'relative',
+                zIndex: 1,
               }}
-              onClick={() => handleTabChange(i)}
+              onClick={() => setActiveTab(i)}
             >
               <TabIcon index={i} active={activeTab === i} />
               {tab}
@@ -208,37 +208,40 @@ export default function Input() {
         {/* Panel */}
         <div style={styles.panel}>
 
-          {/* ── YouTube ── */}
+          {/* YouTube */}
           {activeTab === 0 && (
             <div style={styles.tabContent}>
               <label style={styles.label}>YouTube URL</label>
               <div style={styles.urlRow}>
                 <input
-                  style={styles.urlInput}
+                  style={{
+                    ...styles.urlInput,
+                    ...(ytUrlValid ? styles.urlInputValid : {}),
+                    ...(ytUrlInvalid ? styles.urlInputInvalid : {}),
+                    ...(urlFocused && !ytUrlValid && !ytUrlInvalid ? styles.urlInputFocused : {}),
+                  }}
                   type="url"
                   placeholder="https://www.youtube.com/watch?v=..."
                   value={ytUrl}
                   onChange={e => { setYtUrl(e.target.value); setYtError(''); setYtText(''); setYtLang('') }}
+                  onFocus={() => setUrlFocused(true)}
+                  onBlur={() => setUrlFocused(false)}
                   onKeyDown={e => e.key === 'Enter' && !ytLoading && ytUrl.trim() && handleExtractTranscript()}
                   spellCheck={false}
                 />
                 <button
-                  style={{
-                    ...styles.extractBtn,
-                    ...(!ytUrl.trim() || ytLoading ? styles.btnDisabled : {}),
-                  }}
+                  style={{ ...styles.extractBtn, ...(!ytUrl.trim() || ytLoading ? styles.btnDisabled : {}) }}
                   disabled={!ytUrl.trim() || ytLoading}
                   onClick={handleExtractTranscript}
                 >
                   {ytLoading ? <SpinnerIcon /> : <TranscriptIcon />}
-                  {ytLoading ? 'Extracting...' : 'Extract Transcript'}
+                  {ytLoading ? 'Extracting...' : 'Extract'}
                 </button>
               </div>
 
               {ytError && (
-                <div style={styles.errorBox}>
-                  <ErrorIcon />
-                  <span>{ytError}</span>
+                <div style={styles.errorBox} className="shake">
+                  <ErrorIcon /><span>{ytError}</span>
                 </div>
               )}
 
@@ -268,7 +271,7 @@ export default function Input() {
             </div>
           )}
 
-          {/* ── Upload File ── */}
+          {/* Upload File */}
           {activeTab === 1 && (
             <div style={styles.tabContent}>
               <label style={styles.label}>Upload a file</label>
@@ -278,6 +281,7 @@ export default function Input() {
                   ...(isDragging ? styles.dropZoneActive : {}),
                   ...(fileText ? styles.dropZoneDone : {}),
                 }}
+                className={isDragging ? 'drop-zone-dragging' : ''}
                 onDrop={handleFileDrop}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -290,7 +294,6 @@ export default function Input() {
                   style={{ display: 'none' }}
                   onChange={handleFileInputChange}
                 />
-
                 {fileLoading ? (
                   <div style={styles.dropInner}>
                     <SpinnerIcon size={28} />
@@ -310,7 +313,7 @@ export default function Input() {
                   </div>
                 ) : (
                   <div style={styles.dropInner}>
-                    <UploadIcon />
+                    <UploadIcon dragging={isDragging} />
                     <span style={styles.dropPrimary}>
                       {isDragging ? 'Release to upload' : 'Drop a file here, or click to browse'}
                     </span>
@@ -321,28 +324,37 @@ export default function Input() {
 
               {fileError && (
                 <div style={styles.errorBox}>
-                  <ErrorIcon />
-                  <span>{fileError}</span>
+                  <ErrorIcon /><span>{fileError}</span>
                 </div>
               )}
             </div>
           )}
 
-          {/* ── Paste Text ── */}
+          {/* Paste Text */}
           {activeTab === 2 && (
             <div style={styles.tabContent}>
               <label style={styles.label}>Paste your text</label>
               <div style={styles.textareaWrap}>
                 <textarea
-                  style={styles.textarea}
+                  style={{
+                    ...styles.textarea,
+                    ...(textareaFocused ? styles.textareaFocused : {}),
+                  }}
                   placeholder="Paste your English text here..."
                   value={pasteText}
                   onChange={e => setPasteText(e.target.value)}
+                  onFocus={() => setTextareaFocused(true)}
+                  onBlur={() => setTextareaFocused(false)}
                   spellCheck={false}
                 />
-                <span style={styles.charCounter}>
-                  {pasteText.length.toLocaleString()} characters
-                </span>
+                <div style={styles.charRow}>
+                  {charInfo.label && (
+                    <span style={{ ...styles.charHint, color: charInfo.color }}>{charInfo.label}</span>
+                  )}
+                  <span style={{ ...styles.charCounter, color: charInfo.color }}>
+                    {pasteText.length.toLocaleString()} chars
+                  </span>
+                </div>
               </div>
             </div>
           )}
@@ -353,9 +365,7 @@ export default function Input() {
           <div style={styles.previewCard}>
             <div style={styles.previewHeader}>
               <span style={styles.previewLabel}>Preview</span>
-              <span style={styles.previewMeta}>
-                {currentText.length.toLocaleString()} characters total
-              </span>
+              <span style={styles.previewMeta}>{currentText.length.toLocaleString()} characters</span>
             </div>
             <p style={styles.previewText}>
               {currentText.slice(0, PREVIEW_LENGTH)}
@@ -363,9 +373,10 @@ export default function Input() {
                 <span style={{ color: 'var(--text-muted)' }}>...</span>
               )}
             </p>
-            <button style={styles.analyzeBtn} onClick={handleAnalyze}>
+            <button style={styles.analyzeBtn} className="btn-shimmer" onClick={handleAnalyze}>
               <AnalyzeIcon />
               Analyze Text
+              <ArrowIcon />
             </button>
           </div>
         )}
@@ -386,7 +397,8 @@ function TabIcon({ index, active }) {
   )
   if (index === 1) return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <path d="M8 1H3.5A1.5 1.5 0 002 2.5v9A1.5 1.5 0 003.5 13h7A1.5 1.5 0 0012 11.5V5L8 1z" stroke={color} strokeWidth="1.3" strokeLinejoin="round" />
+      <path d="M8 1H3.5A1.5 1.5 0 002 2.5v9A1.5 1.5 0 003.5 13h7A1.5 1.5 0 0012 11.5V5L8 1z"
+        stroke={color} strokeWidth="1.3" strokeLinejoin="round" />
       <path d="M8 1v4h4" stroke={color} strokeWidth="1.3" strokeLinejoin="round" />
     </svg>
   )
@@ -400,9 +412,11 @@ function TabIcon({ index, active }) {
 
 function SpinnerIcon({ size = 15 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 15 15" fill="none" style={{ animation: 'spin 0.75s linear infinite', flexShrink: 0 }}>
+    <svg width={size} height={size} viewBox="0 0 15 15" fill="none"
+      style={{ animation: 'spin 0.75s linear infinite', flexShrink: 0 }}>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-      <circle cx="7.5" cy="7.5" r="6" stroke="currentColor" strokeWidth="1.5" strokeDasharray="28" strokeDashoffset="10" strokeLinecap="round" />
+      <circle cx="7.5" cy="7.5" r="6" stroke="currentColor" strokeWidth="1.5"
+        strokeDasharray="28" strokeDashoffset="10" strokeLinecap="round" />
     </svg>
   )
 }
@@ -433,11 +447,12 @@ function CheckIcon() {
   )
 }
 
-function UploadIcon() {
+function UploadIcon({ dragging }) {
+  const color = dragging ? 'var(--accent-primary)' : 'var(--text-muted)'
   return (
     <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-      <path d="M16 22V10M16 10l-5 5M16 10l5 5" stroke="var(--text-muted)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M6 24h20" stroke="var(--text-muted)" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M16 22V10M16 10l-5 5M16 10l5 5" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M6 24h20" stroke={color} strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   )
 }
@@ -445,7 +460,8 @@ function UploadIcon() {
 function FileSuccessIcon() {
   return (
     <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-      <path d="M20 3H9a2 2 0 00-2 2v22a2 2 0 002 2h14a2 2 0 002-2V8l-5-5z" stroke="var(--success)" strokeWidth="1.5" strokeLinejoin="round" />
+      <path d="M20 3H9a2 2 0 00-2 2v22a2 2 0 002 2h14a2 2 0 002-2V8l-5-5z"
+        stroke="var(--success)" strokeWidth="1.5" strokeLinejoin="round" />
       <path d="M20 3v5h5" stroke="var(--success)" strokeWidth="1.5" strokeLinejoin="round" />
       <path d="M12 17l2.5 2.5L21 13" stroke="var(--success)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
@@ -471,18 +487,25 @@ function AnalyzeIcon() {
   )
 }
 
+function ArrowIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" style={{ flexShrink: 0 }}>
+      <path d="M3 7.5h9M8.5 3.5l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = {
   page: {
     minHeight: '100vh',
-    background: 'var(--bg-base)',
     display: 'flex',
     flexDirection: 'column',
   },
   main: {
     flex: 1,
-    maxWidth: '680px',
+    maxWidth: '700px',
     width: '100%',
     margin: '0 auto',
     padding: '48px 24px 80px',
@@ -490,11 +513,7 @@ const styles = {
     flexDirection: 'column',
     gap: '24px',
   },
-  header: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px',
-  },
+  header: { display: 'flex', flexDirection: 'column', gap: '6px' },
   title: {
     fontSize: '1.6rem',
     fontWeight: '800',
@@ -502,19 +521,27 @@ const styles = {
     letterSpacing: '-0.04em',
     lineHeight: 1.2,
   },
-  desc: {
-    fontSize: '0.875rem',
-    color: 'var(--text-secondary)',
-    lineHeight: 1.6,
-  },
-  // Tabs
+  desc: { fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.6 },
   tabBar: {
     display: 'flex',
-    gap: '4px',
+    gap: '0',
     background: 'var(--bg-surface)',
     border: '1px solid var(--border)',
     borderRadius: 'var(--radius-lg)',
     padding: '5px',
+    position: 'relative',
+  },
+  tabIndicator: {
+    position: 'absolute',
+    top: '5px',
+    width: 'calc((100% - 10px) / 3)',
+    height: 'calc(100% - 10px)',
+    background: 'var(--bg-elevated)',
+    borderRadius: 'var(--radius-md)',
+    transition: 'left 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+    boxShadow: '0 1px 6px rgba(0,0,0,0.3)',
+    zIndex: 0,
+    pointerEvents: 'none',
   },
   tabBtn: {
     flex: 1,
@@ -530,40 +557,26 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     gap: '7px',
-    transition: 'background 150ms ease, color 150ms ease',
+    transition: 'color 0.2s ease',
     fontFamily: 'inherit',
     whiteSpace: 'nowrap',
   },
-  tabBtnActive: {
-    background: 'var(--bg-elevated)',
-    color: 'var(--accent-primary)',
-    boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
-  },
-  // Panel
+  tabBtnActive: { color: 'var(--accent-primary)' },
   panel: {
     background: 'var(--bg-surface)',
     border: '1px solid var(--border)',
     borderRadius: 'var(--radius-xl)',
     padding: '28px',
   },
-  tabContent: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '14px',
-  },
+  tabContent: { display: 'flex', flexDirection: 'column', gap: '14px' },
   label: {
-    fontSize: '0.75rem',
+    fontSize: '0.72rem',
     fontWeight: '600',
     color: 'var(--text-secondary)',
     textTransform: 'uppercase',
     letterSpacing: '0.06em',
   },
-  // YouTube
-  urlRow: {
-    display: 'flex',
-    gap: '10px',
-    alignItems: 'stretch',
-  },
+  urlRow: { display: 'flex', gap: '10px', alignItems: 'stretch' },
   urlInput: {
     flex: 1,
     background: 'var(--bg-elevated)',
@@ -573,8 +586,20 @@ const styles = {
     color: 'var(--text-primary)',
     fontSize: '0.875rem',
     fontFamily: 'inherit',
-    transition: 'border-color 150ms ease',
+    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
     minWidth: 0,
+  },
+  urlInputFocused: {
+    borderColor: 'var(--accent-primary)',
+    boxShadow: '0 0 0 3px var(--accent-glow)',
+  },
+  urlInputValid: {
+    borderColor: 'var(--success)',
+    boxShadow: '0 0 0 3px rgba(16,185,129,0.1)',
+  },
+  urlInputInvalid: {
+    borderColor: 'var(--error)',
+    boxShadow: '0 0 0 3px rgba(239,68,68,0.1)',
   },
   extractBtn: {
     background: 'var(--accent-primary-dim)',
@@ -590,19 +615,16 @@ const styles = {
     gap: '7px',
     fontFamily: 'inherit',
     whiteSpace: 'nowrap',
-    transition: 'opacity 150ms ease',
+    transition: 'opacity 0.2s ease',
     flexShrink: 0,
   },
-  btnDisabled: {
-    opacity: 0.35,
-    cursor: 'not-allowed',
-  },
+  btnDisabled: { opacity: 0.35, cursor: 'not-allowed' },
   errorBox: {
     display: 'flex',
     alignItems: 'flex-start',
     gap: '10px',
     background: 'var(--error-dim)',
-    border: '1px solid rgba(248,113,113,0.2)',
+    border: '1px solid rgba(239,68,68,0.2)',
     borderRadius: 'var(--radius-md)',
     padding: '12px 14px',
     fontSize: '0.82rem',
@@ -639,26 +661,27 @@ const styles = {
     color: '#f59e0b',
     lineHeight: 1.5,
   },
-  // File upload
   dropZone: {
     border: '2px dashed var(--border)',
     borderRadius: 'var(--radius-lg)',
-    padding: '48px 24px',
+    padding: '52px 24px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     cursor: 'pointer',
-    transition: 'border-color 150ms ease, background 150ms ease',
+    transition: 'border-color 0.2s ease, background 0.2s ease',
     background: 'var(--bg-base)',
   },
   dropZoneActive: {
     borderColor: 'var(--accent-primary)',
-    background: 'var(--accent-primary-dim)',
+    background: 'rgba(99,102,241,0.05)',
+    borderStyle: 'solid',
   },
   dropZoneDone: {
     borderColor: 'rgba(16,185,129,0.3)',
     background: 'var(--success-dim)',
     cursor: 'default',
+    borderStyle: 'solid',
   },
   dropInner: {
     display: 'flex',
@@ -674,10 +697,7 @@ const styles = {
     marginTop: '4px',
     wordBreak: 'break-all',
   },
-  dropSub: {
-    fontSize: '0.78rem',
-    color: 'var(--text-muted)',
-  },
+  dropSub: { fontSize: '0.78rem', color: 'var(--text-muted)' },
   changeFileBtn: {
     marginTop: '6px',
     background: 'none',
@@ -688,14 +708,9 @@ const styles = {
     fontSize: '0.78rem',
     cursor: 'pointer',
     fontFamily: 'inherit',
-    transition: 'opacity 150ms ease',
+    transition: 'opacity 0.2s ease',
   },
-  // Textarea
-  textareaWrap: {
-    position: 'relative',
-    display: 'flex',
-    flexDirection: 'column',
-  },
+  textareaWrap: { position: 'relative', display: 'flex', flexDirection: 'column' },
   textarea: {
     background: 'var(--bg-elevated)',
     border: '1px solid var(--border)',
@@ -707,20 +722,34 @@ const styles = {
     fontFamily: 'inherit',
     resize: 'vertical',
     minHeight: '220px',
-    transition: 'border-color 150ms ease',
+    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
     outline: 'none',
   },
-  charCounter: {
-    alignSelf: 'flex-end',
-    marginTop: '6px',
-    fontSize: '0.72rem',
-    color: 'var(--text-muted)',
-    fontFamily: "'SF Mono', 'Cascadia Code', monospace",
+  textareaFocused: {
+    borderColor: 'var(--accent-primary)',
+    boxShadow: '0 0 0 3px var(--accent-glow)',
   },
-  // Preview
+  charRow: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: '7px',
+    transition: 'color 0.3s ease',
+  },
+  charHint: {
+    fontSize: '0.72rem',
+    fontWeight: '500',
+    transition: 'color 0.3s ease',
+  },
+  charCounter: {
+    fontSize: '0.72rem',
+    fontFamily: "'SF Mono', 'Cascadia Code', monospace",
+    transition: 'color 0.3s ease',
+  },
   previewCard: {
     background: 'var(--bg-surface)',
     border: '1px solid var(--border)',
+    borderLeft: '3px solid var(--accent-primary)',
     borderRadius: 'var(--radius-xl)',
     padding: '24px',
     display: 'flex',
@@ -733,11 +762,11 @@ const styles = {
     justifyContent: 'space-between',
   },
   previewLabel: {
-    fontSize: '0.72rem',
-    fontWeight: '600',
-    color: 'var(--text-muted)',
+    fontSize: '0.68rem',
+    fontWeight: '700',
+    color: 'var(--accent-primary)',
     textTransform: 'uppercase',
-    letterSpacing: '0.08em',
+    letterSpacing: '0.1em',
   },
   previewMeta: {
     fontSize: '0.72rem',
@@ -753,6 +782,7 @@ const styles = {
     borderRadius: 'var(--radius-md)',
     border: '1px solid var(--border)',
     wordBreak: 'break-word',
+    fontFamily: "'Georgia', serif",
   },
   analyzeBtn: {
     width: '100%',
@@ -770,7 +800,7 @@ const styles = {
     gap: '8px',
     fontFamily: 'inherit',
     letterSpacing: '0.01em',
-    boxShadow: '0 4px 16px rgba(99,102,241,0.3)',
-    transition: 'opacity 150ms ease, transform 150ms ease',
+    boxShadow: '0 4px 20px rgba(99,102,241,0.28)',
+    transition: 'opacity 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease',
   },
 }

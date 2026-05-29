@@ -4,14 +4,11 @@ import { useApp } from '../context/AppContext'
 import Navbar from '../components/Navbar'
 import { callAI } from '../utils/callAI'
 
-// ─── Section generation (non-YouTube) ────────────────────────────────────────
-
 function splitTextIntoSections(text, maxLen = 500) {
   const parts = text.match(/[^.!?\n]+[.!?\n]+|\S[^.!?\n]*/g) || [text]
   const sections = []
   let current = ''
   let num = 1
-
   for (const part of parts) {
     if (current.length + part.length > maxLen && current.trim()) {
       sections.push({ minute: num, timeLabel: `Section ${num}`, text: current.trim(), segments: [] })
@@ -26,8 +23,6 @@ function splitTextIntoSections(text, maxLen = 500) {
   }
   return sections
 }
-
-// ─── Prompt ───────────────────────────────────────────────────────────────────
 
 function buildMinutePrompt(section, nativeLanguage) {
   return `You are an English teacher. The student speaks ${nativeLanguage} at a ZERO English level.
@@ -77,11 +72,25 @@ function parseJSON(raw) {
   }
 }
 
+function getPOSStyle(pos) {
+  const p = (pos || '').toLowerCase()
+  if (p.includes('noun')) return { color: '#38bdf8', bg: 'rgba(56,189,248,0.1)', border: 'rgba(56,189,248,0.2)' }
+  if (p.includes('verb')) return { color: '#4ade80', bg: 'rgba(74,222,128,0.1)', border: 'rgba(74,222,128,0.2)' }
+  if (p.includes('adj')) return { color: '#fb923c', bg: 'rgba(251,146,60,0.1)', border: 'rgba(251,146,60,0.2)' }
+  if (p.includes('adv')) return { color: '#c084fc', bg: 'rgba(192,132,252,0.1)', border: 'rgba(192,132,252,0.2)' }
+  return { color: 'var(--accent-secondary)', bg: 'var(--accent-secondary-dim)', border: 'rgba(139,92,246,0.2)' }
+}
+
+function firstNWords(text, n) {
+  return (text || '').split(/\s+/).slice(0, n).join(' ')
+}
+
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function SectionLabel({ title, count }) {
   return (
     <div style={styles.sectionLabel}>
+      <div style={styles.sectionLabelLine} />
       <span style={styles.sectionLabelText}>{title}</span>
       {count > 0 && <span style={styles.sectionBadge}>{count}</span>}
     </div>
@@ -90,38 +99,63 @@ function SectionLabel({ title, count }) {
 
 function SidebarItem({ section, active, analyzed, isLoading, onClick }) {
   return (
-    <button style={{ ...styles.sidebarItem, ...(active ? styles.sidebarItemActive : {}) }} onClick={onClick}>
+    <button
+      style={{
+        ...styles.sidebarItem,
+        ...(active ? styles.sidebarItemActive : {}),
+      }}
+      onClick={onClick}
+    >
       <div style={styles.sidebarItemRow}>
-        <span style={{ ...styles.sidebarTime, ...(active ? styles.sidebarTimeActive : {}) }}>
+        <span style={{ ...styles.sidebarTime, ...(active ? styles.sidebarTimeActive : styles.sidebarTimeDefault) }}>
           {section.timeLabel}
         </span>
         {isLoading
           ? <div style={styles.sidebarSpinner} />
           : analyzed
-            ? <div style={styles.sidebarDot} />
+            ? <CheckmarkSmall />
             : null}
       </div>
       <span style={styles.sidebarPreview}>
-        {(section.text || '').slice(0, 80)}
+        {firstNWords(section.text, 8)}
       </span>
     </button>
   )
 }
 
+function CheckmarkSmall() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 11 11" fill="none" style={{ flexShrink: 0 }}>
+      <circle cx="5.5" cy="5.5" r="5.5" fill="rgba(16,185,129,0.15)" />
+      <path d="M3 5.5l1.8 1.8L8 4" stroke="var(--success)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 function VocabCard({ item }) {
+  const posStyle = getPOSStyle(item.pos)
   return (
     <div style={styles.vocabCard}>
       <div style={styles.vocabTop}>
         <span style={styles.vocabWord}>{item.word}</span>
-        {item.pos && <span style={styles.vocabPOS}>{item.pos}</span>}
+        {item.pos && (
+          <span style={{
+            ...styles.vocabPOS,
+            color: posStyle.color,
+            background: posStyle.bg,
+            border: `1px solid ${posStyle.border}`,
+          }}>
+            {item.pos}
+          </span>
+        )}
       </div>
-      {item.pronunciation && <span style={styles.vocabPronun}>{item.pronunciation}</span>}
+      {item.pronunciation && (
+        <span style={styles.vocabPronun}>[{item.pronunciation}]</span>
+      )}
       <span style={styles.vocabMeaning}>{item.meaning}</span>
       {item.example && (
         <div style={styles.vocabExample}>
-          <span style={styles.vocabQ}>"</span>
-          <span style={styles.vocabExText}>{item.example}</span>
-          <span style={styles.vocabQ}>"</span>
+          <span style={styles.vocabExText}>"{item.example}"</span>
         </div>
       )}
     </div>
@@ -131,7 +165,7 @@ function VocabCard({ item }) {
 function SentenceCard({ item }) {
   return (
     <div style={styles.sentenceCard}>
-      <p style={styles.sentenceEn}>{item.sentence}</p>
+      <p style={styles.sentenceEn}>"{item.sentence}"</p>
       <p style={styles.sentenceTr}>{item.translation}</p>
       {item.grammar_note && (
         <p style={styles.sentenceGrammar}>
@@ -180,13 +214,33 @@ function OriginalBlock({ section }) {
   )
 }
 
+function SkeletonLoader() {
+  return (
+    <div style={styles.skeletonWrap}>
+      <div className="skeleton" style={{ height: '80px', borderRadius: 'var(--radius-lg)', marginBottom: '24px' }} />
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+        <div className="skeleton" style={{ height: '14px', flex: 2 }} />
+        <div className="skeleton" style={{ height: '14px', flex: 1 }} />
+        <div className="skeleton" style={{ height: '14px', flex: 1.5 }} />
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '24px' }}>
+        {[0,1,2,3].map(i => (
+          <div key={i} className="skeleton" style={{ height: '100px', borderRadius: 'var(--radius-lg)' }} />
+        ))}
+      </div>
+      <div className="skeleton" style={{ height: '14px', width: '60%', marginBottom: '8px' }} />
+      <div className="skeleton" style={{ height: '14px', width: '80%', marginBottom: '8px' }} />
+      <div className="skeleton" style={{ height: '14px', width: '45%' }} />
+    </div>
+  )
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function Analysis() {
   const navigate = useNavigate()
   const { sourceText, nativeLanguage, apiKey, provider, selectedModel, transcriptMinutes } = useApp()
 
-  // Always treat as array — guards against undefined from old context or edge cases
   const minutes = Array.isArray(transcriptMinutes) ? transcriptMinutes : []
   const isYouTube = minutes.length > 0
 
@@ -199,12 +253,9 @@ export default function Analysis() {
   const [analyzeAllProgress, setAnalyzeAllProgress] = useState('')
   const analyzingAllRef = useRef(false)
 
-  // Set up sections on mount and auto-analyze first one
   useEffect(() => {
     if (!sourceText) { navigate('/input'); return }
-    const secs = minutes.length > 0
-      ? minutes
-      : splitTextIntoSections(sourceText, 500)
+    const secs = minutes.length > 0 ? minutes : splitTextIntoSections(sourceText, 500)
     setSections(secs)
     if (secs.length > 0) {
       setSelectedIndex(0)
@@ -246,15 +297,11 @@ export default function Analysis() {
     if (analyzingAllRef.current || sections.length === 0) return
     analyzingAllRef.current = true
     setAnalyzingAll(true)
-
-    // snapshot which are already cached
     const done = new Set(Object.keys(cache).map(Number))
-
     for (let i = 0; i < sections.length; i++) {
       if (!analyzingAllRef.current) break
       const section = sections[i]
       if (done.has(section.minute)) continue
-
       setSelectedIndex(i)
       setAnalyzeAllProgress(`Analyzing ${section.timeLabel} (${i + 1} of ${sections.length})...`)
       setAnalyzing(true)
@@ -269,14 +316,12 @@ export default function Analysis() {
         setCache(prev => ({ ...prev, [section.minute]: result }))
         done.add(section.minute)
       } catch {
-        // continue even if one section fails
+        // continue even if one fails
       } finally {
         setAnalyzing(false)
       }
-
       if (i < sections.length - 1) await new Promise(r => setTimeout(r, 250))
     }
-
     analyzingAllRef.current = false
     setAnalyzingAll(false)
     setAnalyzeAllProgress('')
@@ -290,12 +335,16 @@ export default function Analysis() {
   const currentResult = selectedSection ? cache[selectedSection.minute] : null
   const cachedCount = Object.keys(cache).length
 
+  const uncachedCount = sections.length - cachedCount
+  const estSecs = uncachedCount * 3
+  const estLabel = estSecs < 60 ? `~${estSecs}s` : `~${Math.ceil(estSecs / 60)}min`
+
   return (
     <div style={styles.page}>
       <Navbar />
 
       <div style={styles.panelArea}>
-        {/* ── Sidebar ── */}
+        {/* Sidebar */}
         <div style={styles.sidebar}>
           <div style={styles.sidebarHeader}>
             <div style={styles.sidebarHeaderTop}>
@@ -306,10 +355,11 @@ export default function Analysis() {
               <button
                 style={styles.analyzeAllBtn}
                 onClick={handleAnalyzeAll}
-                disabled={sections.length === 0 || analyzingAll}
+                disabled={sections.length === 0}
               >
                 <PlayIcon />
                 Analyze All
+                {uncachedCount > 0 && <span style={styles.estTime}>{estLabel}</span>}
               </button>
             ) : (
               <button style={styles.stopBtn} onClick={handleStopAll}>
@@ -333,9 +383,8 @@ export default function Analysis() {
           </div>
         </div>
 
-        {/* ── Main panel ── */}
+        {/* Main panel */}
         <div style={styles.mainPanel}>
-          {/* Top bar */}
           <div style={styles.mainHeader}>
             <div>
               <h1 style={styles.mainTitle}>
@@ -355,24 +404,20 @@ export default function Analysis() {
             </div>
           </div>
 
-          {/* Analyze-all progress banner */}
           {analyzingAll && (
             <div style={styles.progressBanner}>
               <div style={styles.progressSpinner} />
               <span style={styles.progressText}>{analyzeAllProgress}</span>
               <div style={styles.progressBarWrap}>
-                <div
-                  style={{
-                    ...styles.progressBarFill,
-                    width: `${Math.round((cachedCount / sections.length) * 100)}%`,
-                    transition: 'width 400ms ease',
-                  }}
-                />
+                <div style={{
+                  ...styles.progressBarFill,
+                  width: `${Math.round((cachedCount / sections.length) * 100)}%`,
+                  transition: 'width 400ms ease',
+                }} />
               </div>
             </div>
           )}
 
-          {/* Content */}
           <div style={styles.mainContent}>
             {!selectedSection && (
               <div style={styles.emptyState}>
@@ -384,17 +429,8 @@ export default function Analysis() {
               <>
                 <OriginalBlock section={selectedSection} />
 
-                {/* Loading */}
-                {analyzing && !currentResult && (
-                  <div style={styles.sectionLoading}>
-                    <div style={styles.sectionSpinner} />
-                    <span style={styles.sectionLoadingText}>
-                      Analyzing {selectedSection.timeLabel}...
-                    </span>
-                  </div>
-                )}
+                {analyzing && !currentResult && <SkeletonLoader />}
 
-                {/* Error */}
                 {analyzeError && !analyzing && (
                   <div style={styles.errorCard}>
                     <p style={styles.errorMsg}>{analyzeError}</p>
@@ -407,7 +443,6 @@ export default function Analysis() {
                   </div>
                 )}
 
-                {/* Lesson content */}
                 {currentResult && (
                   <div style={styles.lesson}>
                     {currentResult.minute_summary && (
@@ -438,6 +473,7 @@ export default function Analysis() {
 
                     {currentResult.grammar_focus && (
                       <div style={styles.lessonSection}>
+                        <SectionLabel title="Grammar Focus" />
                         <GrammarFocusCard item={currentResult.grammar_focus} />
                       </div>
                     )}
@@ -455,19 +491,11 @@ export default function Analysis() {
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
 function PlayIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-      <path d="M2.5 2l7 4-7 4V2z" fill="currentColor" />
-    </svg>
-  )
+  return <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2.5 2l7 4-7 4V2z" fill="currentColor" /></svg>
 }
 
 function StopIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-      <rect x="2" y="2" width="8" height="8" rx="1" fill="currentColor" />
-    </svg>
-  )
+  return <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><rect x="2" y="2" width="8" height="8" rx="1" fill="currentColor" /></svg>
 }
 
 function ReaderIcon() {
@@ -482,7 +510,8 @@ function ReaderIcon() {
 function ChatIcon() {
   return (
     <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-      <path d="M11 6.5a4.5 4.5 0 01-4.5 4.5H2.5L1 12.5V6.5a4.5 4.5 0 119 0z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+      <path d="M11 6.5a4.5 4.5 0 01-4.5 4.5H2.5L1 12.5V6.5a4.5 4.5 0 119 0z"
+        stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
     </svg>
   )
 }
@@ -490,21 +519,10 @@ function ChatIcon() {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = {
-  page: {
-    height: '100vh',
-    overflow: 'hidden',
-    background: 'var(--bg-base)',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  panelArea: {
-    flex: 1,
-    display: 'flex',
-    overflow: 'hidden',
-  },
-  // ── Sidebar ──
+  page: { height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' },
+  panelArea: { flex: 1, display: 'flex', overflow: 'hidden' },
   sidebar: {
-    width: '260px',
+    width: '264px',
     flexShrink: 0,
     borderRight: '1px solid var(--border)',
     background: 'var(--bg-surface)',
@@ -526,11 +544,11 @@ const styles = {
     justifyContent: 'space-between',
   },
   sidebarTitle: {
-    fontSize: '0.72rem',
+    fontSize: '0.68rem',
     fontWeight: '700',
     color: 'var(--text-secondary)',
     textTransform: 'uppercase',
-    letterSpacing: '0.08em',
+    letterSpacing: '0.1em',
   },
   sidebarCount: {
     fontSize: '0.7rem',
@@ -552,12 +570,18 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     gap: '6px',
-    transition: 'opacity 150ms ease',
+    transition: 'opacity 0.2s ease',
+  },
+  estTime: {
+    fontSize: '0.68rem',
+    color: 'rgba(99,102,241,0.6)',
+    fontFamily: "'SF Mono', monospace",
+    marginLeft: '2px',
   },
   stopBtn: {
     width: '100%',
     background: 'var(--error-dim)',
-    border: '1px solid rgba(248,113,113,0.2)',
+    border: '1px solid rgba(239,68,68,0.2)',
     color: 'var(--error)',
     borderRadius: 'var(--radius-md)',
     padding: '8px 12px',
@@ -589,11 +613,13 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '4px',
-    transition: 'background 120ms ease',
+    transition: 'background 0.15s ease',
     width: '100%',
+    borderLeft: '2px solid transparent',
   },
   sidebarItemActive: {
     background: 'var(--accent-primary-dim)',
+    borderLeftColor: 'var(--accent-primary)',
   },
   sidebarItemRow: {
     display: 'flex',
@@ -603,12 +629,11 @@ const styles = {
   sidebarTime: {
     fontSize: '0.78rem',
     fontWeight: '600',
-    color: 'var(--text-secondary)',
     fontFamily: "'SF Mono', 'Cascadia Code', monospace",
+    transition: 'color 0.15s ease',
   },
-  sidebarTimeActive: {
-    color: 'var(--accent-primary)',
-  },
+  sidebarTimeDefault: { color: 'var(--accent-primary)' },
+  sidebarTimeActive: { color: 'var(--accent-primary)' },
   sidebarSpinner: {
     width: '10px',
     height: '10px',
@@ -618,28 +643,15 @@ const styles = {
     animation: 'spin 0.75s linear infinite',
     flexShrink: 0,
   },
-  sidebarDot: {
-    width: '7px',
-    height: '7px',
-    borderRadius: '50%',
-    background: 'var(--success)',
-    flexShrink: 0,
-  },
   sidebarPreview: {
-    fontSize: '0.72rem',
+    fontSize: '0.7rem',
     color: 'var(--text-muted)',
     lineHeight: 1.4,
     overflow: 'hidden',
     maxHeight: '2.8em',
     wordBreak: 'break-word',
   },
-  // ── Main panel ──
-  mainPanel: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden',
-  },
+  mainPanel: { flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' },
   mainHeader: {
     padding: '20px 28px 16px',
     borderBottom: '1px solid var(--border)',
@@ -657,16 +669,8 @@ const styles = {
     letterSpacing: '-0.03em',
     lineHeight: 1.2,
   },
-  mainSubtitle: {
-    fontSize: '0.8rem',
-    color: 'var(--text-secondary)',
-    marginTop: '4px',
-  },
-  mainHeaderRight: {
-    display: 'flex',
-    gap: '8px',
-    flexShrink: 0,
-  },
+  mainSubtitle: { fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px' },
+  mainHeaderRight: { display: 'flex', gap: '8px', flexShrink: 0 },
   readerBtn: {
     background: 'none',
     border: '1px solid var(--border)',
@@ -680,7 +684,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '5px',
-    transition: 'border-color 150ms ease, color 150ms ease',
+    transition: 'border-color 0.2s ease, color 0.2s ease',
   },
   chatBtn: {
     background: 'var(--accent-primary)',
@@ -695,6 +699,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '5px',
+    transition: 'opacity 0.2s ease',
   },
   progressBanner: {
     display: 'flex',
@@ -714,12 +719,7 @@ const styles = {
     animation: 'spin 0.75s linear infinite',
     flexShrink: 0,
   },
-  progressText: {
-    flex: 1,
-    fontSize: '0.8rem',
-    color: 'var(--accent-primary)',
-    fontWeight: '500',
-  },
+  progressText: { flex: 1, fontSize: '0.8rem', color: 'var(--accent-primary)', fontWeight: '500' },
   progressBarWrap: {
     width: '120px',
     height: '4px',
@@ -728,11 +728,7 @@ const styles = {
     overflow: 'hidden',
     flexShrink: 0,
   },
-  progressBarFill: {
-    height: '100%',
-    background: 'var(--accent-primary)',
-    borderRadius: '99px',
-  },
+  progressBarFill: { height: '100%', background: 'var(--accent-primary)', borderRadius: '99px' },
   mainContent: {
     flex: 1,
     overflowY: 'auto',
@@ -747,11 +743,8 @@ const styles = {
     justifyContent: 'center',
     height: '200px',
   },
-  emptyText: {
-    fontSize: '0.875rem',
-    color: 'var(--text-muted)',
-  },
-  // Original text block
+  emptyText: { fontSize: '0.875rem', color: 'var(--text-muted)' },
+  skeletonWrap: { display: 'flex', flexDirection: 'column', gap: '10px' },
   originalBlock: {
     background: 'var(--bg-surface)',
     border: '1px solid var(--border)',
@@ -768,11 +761,11 @@ const styles = {
     background: 'var(--bg-elevated)',
   },
   originalLabel: {
-    fontSize: '0.65rem',
+    fontSize: '0.62rem',
     fontWeight: '700',
     color: 'var(--text-muted)',
     textTransform: 'uppercase',
-    letterSpacing: '0.08em',
+    letterSpacing: '0.1em',
   },
   originalTime: {
     fontSize: '0.7rem',
@@ -787,7 +780,6 @@ const styles = {
     lineHeight: 1.8,
     fontFamily: "'Georgia', 'Times New Roman', serif",
   },
-  // Loading / error states
   sectionLoading: {
     display: 'flex',
     alignItems: 'center',
@@ -795,21 +787,9 @@ const styles = {
     padding: '32px 0',
     justifyContent: 'center',
   },
-  sectionSpinner: {
-    width: '20px',
-    height: '20px',
-    borderRadius: '50%',
-    border: '2px solid var(--border)',
-    borderTopColor: 'var(--accent-primary)',
-    animation: 'spin 0.75s linear infinite',
-  },
-  sectionLoadingText: {
-    fontSize: '0.875rem',
-    color: 'var(--text-secondary)',
-  },
   errorCard: {
     background: 'var(--error-dim)',
-    border: '1px solid rgba(248,113,113,0.2)',
+    border: '1px solid rgba(239,68,68,0.2)',
     borderRadius: 'var(--radius-lg)',
     padding: '16px 20px',
     display: 'flex',
@@ -817,11 +797,7 @@ const styles = {
     justifyContent: 'space-between',
     gap: '12px',
   },
-  errorMsg: {
-    fontSize: '0.875rem',
-    color: 'var(--error)',
-    lineHeight: 1.5,
-  },
+  errorMsg: { fontSize: '0.875rem', color: 'var(--error)', lineHeight: 1.5 },
   retryBtn: {
     background: 'var(--error)',
     border: 'none',
@@ -834,24 +810,21 @@ const styles = {
     fontFamily: 'inherit',
     flexShrink: 0,
   },
-  // Lesson
-  lesson: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '24px',
-    animation: 'fade-in 250ms ease',
-  },
-  lessonSection: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-  },
+  lesson: { display: 'flex', flexDirection: 'column', gap: '24px', animation: 'fade-in 250ms ease' },
+  lessonSection: { display: 'flex', flexDirection: 'column', gap: '12px' },
   sectionLabel: {
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
     paddingBottom: '10px',
     borderBottom: '1px solid var(--border)',
+  },
+  sectionLabelLine: {
+    width: '3px',
+    height: '14px',
+    background: 'var(--accent-primary)',
+    borderRadius: '99px',
+    flexShrink: 0,
   },
   sectionLabelText: {
     fontSize: '0.72rem',
@@ -869,7 +842,6 @@ const styles = {
     color: 'var(--text-muted)',
     fontWeight: '600',
   },
-  // Summary
   summaryCard: {
     background: 'var(--bg-surface)',
     border: '1px solid var(--border)',
@@ -881,23 +853,14 @@ const styles = {
     gap: '8px',
   },
   summaryLabel: {
-    fontSize: '0.65rem',
+    fontSize: '0.62rem',
     fontWeight: '700',
     color: 'var(--accent-secondary)',
     textTransform: 'uppercase',
     letterSpacing: '0.1em',
   },
-  summaryText: {
-    fontSize: '0.9rem',
-    color: 'var(--text-primary)',
-    lineHeight: 1.75,
-  },
-  // Vocabulary
-  vocabGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '10px',
-  },
+  summaryText: { fontSize: '0.9rem', color: 'var(--text-primary)', lineHeight: 1.75 },
+  vocabGrid: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' },
   vocabCard: {
     background: 'var(--bg-surface)',
     border: '1px solid var(--border)',
@@ -906,27 +869,20 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '4px',
+    transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
   },
-  vocabTop: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: '8px',
-  },
+  vocabTop: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' },
   vocabWord: {
-    fontSize: '1.05rem',
+    fontSize: '1.1rem',
     fontWeight: '800',
     color: 'var(--accent-primary)',
     fontFamily: "'SF Mono', 'Cascadia Code', monospace",
   },
   vocabPOS: {
-    fontSize: '0.62rem',
+    fontSize: '0.6rem',
     fontWeight: '600',
-    color: 'var(--accent-secondary)',
-    background: 'var(--accent-secondary-dim)',
-    border: '1px solid rgba(139,92,246,0.18)',
     borderRadius: '99px',
-    padding: '1px 6px',
+    padding: '2px 7px',
     textTransform: 'lowercase',
     flexShrink: 0,
   },
@@ -934,28 +890,15 @@ const styles = {
     fontSize: '0.75rem',
     color: 'var(--text-muted)',
     fontFamily: "'SF Mono', monospace",
+    fontStyle: 'italic',
   },
-  vocabMeaning: {
-    fontSize: '0.85rem',
-    color: 'var(--text-primary)',
-    fontWeight: '500',
-    lineHeight: 1.4,
-    marginTop: '2px',
-  },
+  vocabMeaning: { fontSize: '0.88rem', color: 'var(--text-primary)', fontWeight: '500', lineHeight: 1.4, marginTop: '4px' },
   vocabExample: {
-    display: 'flex',
-    gap: '2px',
     marginTop: '6px',
-    padding: '6px 10px',
+    padding: '7px 10px',
     background: 'var(--bg-base)',
     borderRadius: 'var(--radius-sm)',
     borderLeft: '2px solid var(--accent-primary)',
-  },
-  vocabQ: {
-    color: 'var(--accent-primary)',
-    fontWeight: '700',
-    fontSize: '0.85rem',
-    flexShrink: 0,
   },
   vocabExText: {
     fontSize: '0.75rem',
@@ -963,12 +906,7 @@ const styles = {
     fontStyle: 'italic',
     lineHeight: 1.5,
   },
-  // Sentence breakdown
-  sentenceList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-  },
+  sentenceList: { display: 'flex', flexDirection: 'column', gap: '8px' },
   sentenceCard: {
     background: 'var(--bg-surface)',
     border: '1px solid var(--border)',
@@ -978,30 +916,10 @@ const styles = {
     flexDirection: 'column',
     gap: '6px',
   },
-  sentenceEn: {
-    fontSize: '0.9rem',
-    fontWeight: '600',
-    color: 'var(--text-primary)',
-    lineHeight: 1.5,
-    fontStyle: 'italic',
-  },
-  sentenceTr: {
-    fontSize: '0.85rem',
-    color: 'var(--text-secondary)',
-    lineHeight: 1.5,
-    paddingTop: '4px',
-    borderTop: '1px solid var(--border)',
-  },
-  sentenceGrammar: {
-    fontSize: '0.78rem',
-    color: 'var(--text-muted)',
-    lineHeight: 1.5,
-  },
-  grammarTag: {
-    fontWeight: '600',
-    color: 'var(--accent-primary)',
-  },
-  // Grammar focus
+  sentenceEn: { fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-primary)', lineHeight: 1.5, fontStyle: 'italic' },
+  sentenceTr: { fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, paddingTop: '4px', borderTop: '1px solid var(--border)' },
+  sentenceGrammar: { fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5 },
+  grammarTag: { fontWeight: '600', color: 'var(--accent-primary)' },
   grammarFocusCard: {
     background: 'var(--bg-surface)',
     border: '1px solid var(--border)',
@@ -1012,7 +930,7 @@ const styles = {
     gap: '10px',
   },
   grammarFocusLabel: {
-    fontSize: '0.65rem',
+    fontSize: '0.62rem',
     fontWeight: '700',
     color: 'var(--accent-primary)',
     textTransform: 'uppercase',
@@ -1029,11 +947,7 @@ const styles = {
     padding: '8px 14px',
     letterSpacing: '0.02em',
   },
-  grammarExplanation: {
-    fontSize: '0.875rem',
-    color: 'var(--text-secondary)',
-    lineHeight: 1.7,
-  },
+  grammarExplanation: { fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.7 },
   grammarFromWrap: {
     display: 'flex',
     flexDirection: 'column',
@@ -1044,16 +958,11 @@ const styles = {
     borderLeft: '2px solid var(--border-hover)',
   },
   grammarFromLabel: {
-    fontSize: '0.65rem',
+    fontSize: '0.62rem',
     fontWeight: '600',
     color: 'var(--text-muted)',
     textTransform: 'uppercase',
     letterSpacing: '0.06em',
   },
-  grammarFromText: {
-    fontSize: '0.83rem',
-    color: 'var(--text-secondary)',
-    fontStyle: 'italic',
-    lineHeight: 1.5,
-  },
+  grammarFromText: { fontSize: '0.83rem', color: 'var(--text-secondary)', fontStyle: 'italic', lineHeight: 1.5 },
 }

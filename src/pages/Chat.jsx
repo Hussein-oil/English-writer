@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import Navbar from '../components/Navbar'
@@ -22,18 +22,14 @@ ${sourceText.substring(0, 1000)}
 Answer all questions in ${nativeLanguage}, but keep English terms, words, and phrases in English when relevant — explain them when needed. Be concise, encouraging, and pedagogically helpful.`
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
 function TypingIndicator() {
   return (
     <div style={styles.bubbleWrap}>
+      <div style={styles.avatar}>EN</div>
       <div style={{ ...styles.bubble, ...styles.aiBubble, padding: '14px 16px' }}>
         <div style={styles.dotRow}>
           {[0, 1, 2].map(i => (
-            <span
-              key={i}
-              style={{ ...styles.dot, animationDelay: `${i * 180}ms` }}
-            />
+            <span key={i} style={{ ...styles.dot, animationDelay: `${i * 180}ms` }} />
           ))}
         </div>
       </div>
@@ -45,23 +41,19 @@ function Message({ msg }) {
   const isUser = msg.role === 'user'
   return (
     <div style={{ ...styles.bubbleWrap, ...(isUser ? styles.userWrap : {}) }}>
-      {!isUser && (
-        <div style={styles.avatar}>AI</div>
-      )}
-      <div
-        style={{
-          ...styles.bubble,
-          ...(isUser ? styles.userBubble : styles.aiBubble),
-          ...(msg.isError ? styles.errorBubble : {}),
-        }}
-      >
-        <p style={styles.bubbleText}>{msg.content}</p>
+      {!isUser && <div style={styles.avatar}>EN</div>}
+      <div style={{
+        ...styles.bubble,
+        ...(isUser ? styles.userBubble : styles.aiBubble),
+        ...(msg.isError ? styles.errorBubble : {}),
+      }}>
+        <p style={{ ...styles.bubbleText, ...(isUser ? styles.userBubbleText : {}) }}>
+          {msg.content}
+        </p>
       </div>
     </div>
   )
 }
-
-// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function Chat() {
   const navigate = useNavigate()
@@ -71,7 +63,7 @@ export default function Chat() {
   const [input, setInput] = useState('')
   const [thinking, setThinking] = useState(false)
   const messagesEndRef = useRef(null)
-  const inputRef = useRef(null)
+  const textareaRef = useRef(null)
 
   useEffect(() => {
     if (!sourceText) navigate('/input')
@@ -83,6 +75,18 @@ export default function Chat() {
 
   const systemPrompt = buildSystemPrompt(nativeLanguage, sourceText || '')
 
+  const adjustHeight = useCallback(() => {
+    const ta = textareaRef.current
+    if (!ta) return
+    ta.style.height = 'auto'
+    ta.style.height = Math.min(ta.scrollHeight, 96) + 'px'
+  }, [])
+
+  function handleInputChange(e) {
+    setInput(e.target.value)
+    adjustHeight()
+  }
+
   async function sendMessage(content) {
     const text = (content ?? input).trim()
     if (!text || thinking) return
@@ -91,8 +95,11 @@ export default function Chat() {
     const history = [...messages, userMsg]
     setMessages(history)
     setInput('')
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
+    }
     setThinking(true)
-    inputRef.current?.focus()
+    textareaRef.current?.focus()
 
     try {
       const apiMessages = history.map(({ role, content }) => ({ role, content }))
@@ -132,24 +139,38 @@ export default function Chat() {
       <Navbar />
 
       <div style={styles.layout}>
-        {/* Messages area */}
         <div style={styles.messagesArea}>
           {isEmpty ? (
             <div style={styles.emptyState}>
               <div style={styles.emptyIcon}>
                 <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-                  <path d="M24 14a10 10 0 01-10 10H6l-3 3V14A10 10 0 1124 14z" stroke="var(--accent-primary)" strokeWidth="1.5" strokeLinejoin="round" />
+                  <path d="M24 14a10 10 0 01-10 10H6l-3 3V14A10 10 0 1124 14z"
+                    stroke="var(--accent-primary)" strokeWidth="1.5" strokeLinejoin="round" />
                   <path d="M9 12h10M9 17h6" stroke="var(--accent-primary)" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
               </div>
               <h2 style={styles.emptyTitle}>Ask me anything about the text</h2>
               <p style={styles.emptyDesc}>
                 I'm here to help you understand the English text you analyzed.
-                Ask questions in any language — I'll reply in {nativeLanguage}.
+                Ask in any language — I'll reply in {nativeLanguage}.
               </p>
               <div style={styles.suggestions}>
                 {SUGGESTIONS.map((s, i) => (
-                  <button key={i} style={styles.suggestion} onClick={() => sendMessage(s)}>
+                  <button
+                    key={i}
+                    style={styles.suggestion}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.borderColor = 'var(--accent-primary)'
+                      e.currentTarget.style.color = 'var(--text-primary)'
+                      e.currentTarget.style.background = 'var(--bg-card-hover)'
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.borderColor = 'var(--border)'
+                      e.currentTarget.style.color = 'var(--text-secondary)'
+                      e.currentTarget.style.background = 'var(--bg-surface)'
+                    }}
+                    onClick={() => sendMessage(s)}
+                  >
                     {s}
                   </button>
                 ))}
@@ -164,23 +185,24 @@ export default function Chat() {
           )}
         </div>
 
-        {/* Input row */}
+        {/* Floating input bar */}
         <div style={styles.inputRow}>
           <div style={styles.inputWrap}>
-            <input
-              ref={inputRef}
+            <textarea
+              ref={textareaRef}
               style={styles.input}
               placeholder={`Ask in ${nativeLanguage} or English...`}
               value={input}
-              onChange={e => setInput(e.target.value)}
+              onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               disabled={thinking}
+              rows={1}
               autoFocus
             />
             <button
               style={{
                 ...styles.sendBtn,
-                ...(!input.trim() || thinking ? styles.sendBtnDisabled : {}),
+                ...(!input.trim() || thinking ? styles.sendBtnDisabled : styles.sendBtnActive),
               }}
               disabled={!input.trim() || thinking}
               onClick={() => sendMessage()}
@@ -189,7 +211,12 @@ export default function Chat() {
             </button>
           </div>
           {messages.length > 0 && (
-            <button style={styles.clearBtn} onClick={() => setMessages([])}>
+            <button
+              style={styles.clearBtn}
+              onMouseEnter={e => e.currentTarget.style.color = 'var(--text-secondary)'}
+              onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
+              onClick={() => setMessages([])}
+            >
               Clear chat
             </button>
           )}
@@ -199,11 +226,9 @@ export default function Chat() {
   )
 }
 
-// ─── Icons ────────────────────────────────────────────────────────────────────
-
 function SendIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
       <path d="M14 8L2 2l3 6-3 6 12-6z" fill="currentColor" />
     </svg>
   )
@@ -213,17 +238,15 @@ function MiniSpinner() {
   return (
     <svg width="15" height="15" viewBox="0 0 15 15" fill="none" style={{ animation: 'spin 0.75s linear infinite' }}>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-      <circle cx="7.5" cy="7.5" r="6" stroke="currentColor" strokeWidth="1.5" strokeDasharray="28" strokeDashoffset="10" strokeLinecap="round" />
+      <circle cx="7.5" cy="7.5" r="6" stroke="currentColor" strokeWidth="1.5"
+        strokeDasharray="28" strokeDashoffset="10" strokeLinecap="round" />
     </svg>
   )
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
 const styles = {
   page: {
     height: '100vh',
-    background: 'var(--bg-base)',
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
@@ -238,7 +261,6 @@ const styles = {
     padding: '0 16px',
     overflow: 'hidden',
   },
-  // Messages
   messagesArea: {
     flex: 1,
     overflowY: 'auto',
@@ -254,9 +276,9 @@ const styles = {
     gap: '14px',
   },
   emptyIcon: {
-    width: '56px',
-    height: '56px',
-    borderRadius: '16px',
+    width: '60px',
+    height: '60px',
+    borderRadius: '18px',
     background: 'var(--accent-primary-dim)',
     border: '1px solid rgba(99,102,241,0.2)',
     display: 'flex',
@@ -264,11 +286,7 @@ const styles = {
     justifyContent: 'center',
     marginBottom: '4px',
   },
-  emptyTitle: {
-    fontSize: '1.1rem',
-    fontWeight: '700',
-    color: 'var(--text-primary)',
-  },
+  emptyTitle: { fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-primary)' },
   emptyDesc: {
     fontSize: '0.875rem',
     color: 'var(--text-secondary)',
@@ -293,23 +311,16 @@ const styles = {
     cursor: 'pointer',
     fontFamily: 'inherit',
     textAlign: 'left',
-    transition: 'border-color 150ms ease, color 150ms ease, background 150ms ease',
+    transition: 'border-color 0.2s ease, color 0.2s ease, background 0.2s ease',
   },
-  messageList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-  },
-  // Message bubbles
+  messageList: { display: 'flex', flexDirection: 'column', gap: '12px' },
   bubbleWrap: {
     display: 'flex',
     alignItems: 'flex-end',
     gap: '8px',
     animation: 'fade-in 200ms ease',
   },
-  userWrap: {
-    flexDirection: 'row-reverse',
-  },
+  userWrap: { flexDirection: 'row-reverse' },
   avatar: {
     width: '28px',
     height: '28px',
@@ -319,10 +330,11 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '0.6rem',
-    fontWeight: '700',
+    fontSize: '0.55rem',
+    fontWeight: '800',
     color: 'var(--accent-primary)',
     flexShrink: 0,
+    letterSpacing: '0.03em',
   },
   bubble: {
     maxWidth: '75%',
@@ -335,12 +347,13 @@ const styles = {
     borderBottomLeftRadius: '4px',
   },
   userBubble: {
-    background: 'var(--accent-primary)',
+    background: 'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)',
     borderBottomRightRadius: '4px',
+    boxShadow: '0 2px 12px rgba(99,102,241,0.25)',
   },
   errorBubble: {
     background: 'var(--error-dim)',
-    border: '1px solid rgba(248,113,113,0.2)',
+    border: '1px solid rgba(239,68,68,0.2)',
   },
   bubbleText: {
     fontSize: '0.9rem',
@@ -349,11 +362,8 @@ const styles = {
     whiteSpace: 'pre-wrap',
     wordBreak: 'break-word',
   },
-  dotRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '5px',
-  },
+  userBubbleText: { color: '#fff' },
+  dotRow: { display: 'flex', alignItems: 'center', gap: '5px' },
   dot: {
     display: 'inline-block',
     width: '7px',
@@ -362,23 +372,23 @@ const styles = {
     background: 'var(--text-muted)',
     animation: 'bounce-dot 1.2s ease infinite',
   },
-  // Input
   inputRow: {
-    padding: '12px 0 20px',
+    padding: '10px 0 20px',
     display: 'flex',
     flexDirection: 'column',
     gap: '8px',
-    borderTop: '1px solid var(--border)',
   },
   inputWrap: {
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     gap: '10px',
-    background: 'var(--bg-surface)',
+    background: 'rgba(15, 15, 26, 0.9)',
+    backdropFilter: 'blur(12px)',
     border: '1px solid var(--border)',
     borderRadius: 'var(--radius-lg)',
-    padding: '6px 8px 6px 16px',
-    transition: 'border-color 150ms ease',
+    padding: '8px 8px 8px 16px',
+    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+    boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
   },
   input: {
     flex: 1,
@@ -388,24 +398,33 @@ const styles = {
     fontSize: '0.9rem',
     fontFamily: 'inherit',
     outline: 'none',
-    minHeight: '32px',
+    resize: 'none',
+    lineHeight: '1.5',
+    minHeight: '24px',
+    maxHeight: '96px',
+    overflowY: 'auto',
+    padding: '4px 0',
   },
   sendBtn: {
     width: '36px',
     height: '36px',
     borderRadius: '10px',
-    background: 'var(--accent-primary)',
     border: 'none',
-    color: '#fff',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
-    transition: 'opacity 150ms ease',
+    transition: 'opacity 0.2s ease, background 0.2s ease',
+  },
+  sendBtnActive: {
+    background: 'var(--accent-primary)',
+    color: '#fff',
   },
   sendBtnDisabled: {
-    opacity: 0.35,
+    background: 'var(--bg-elevated)',
+    color: 'var(--text-muted)',
+    opacity: 0.5,
     cursor: 'not-allowed',
   },
   clearBtn: {
@@ -417,6 +436,6 @@ const styles = {
     cursor: 'pointer',
     fontFamily: 'inherit',
     padding: '2px 4px',
-    transition: 'color 150ms ease',
+    transition: 'color 0.2s ease',
   },
 }

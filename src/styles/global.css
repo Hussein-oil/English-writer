@@ -1,31 +1,55 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  --bg-base: #0a0a0f;
-  --bg-surface: #12121a;
-  --bg-elevated: #1a1a26;
-  --border: #1e1e2e;
+  /* ── Color system ── */
+  --bg-primary: #08080f;
+  --bg-secondary: #0f0f1a;
+  --bg-card: #13131f;
+  --bg-card-hover: #1a1a2e;
+
+  /* Legacy aliases */
+  --bg-base: #08080f;
+  --bg-surface: #0f0f1a;
+  --bg-elevated: #13131f;
+
+  /* Borders */
+  --border-subtle: #1e1e30;
+  --border-active: #6366f1;
+  --border: #1e1e30;
   --border-hover: #2d2d44;
+
+  /* Accent */
   --accent-primary: #6366f1;
   --accent-primary-hover: #818cf8;
   --accent-primary-dim: rgba(99, 102, 241, 0.12);
   --accent-secondary: #8b5cf6;
   --accent-secondary-dim: rgba(139, 92, 246, 0.12);
-  --text-primary: #e2e8f0;
+  --accent-glow: rgba(99, 102, 241, 0.15);
+
+  /* Text */
+  --text-primary: #f1f5f9;
   --text-secondary: #94a3b8;
-  --text-muted: #4a5568;
+  --text-muted: #475569;
+
+  /* State */
   --success: #10b981;
   --success-dim: rgba(16, 185, 129, 0.12);
-  --error: #f87171;
-  --error-dim: rgba(248, 113, 113, 0.12);
-  --radius-sm: 6px;
-  --radius-md: 10px;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --error-dim: rgba(239, 68, 68, 0.12);
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 24px;
+
+  /* Shadows */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
-  --transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  --transition: 200ms ease;
 }
 
 *, *::before, *::after {
@@ -43,7 +67,10 @@ html {
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background-color: var(--bg-base);
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.05) 0%, transparent 60%),
+    var(--bg-primary);
   color: var(--text-primary);
   min-height: 100vh;
   line-height: 1.6;
@@ -55,10 +82,7 @@ body {
   flex-direction: column;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
+a { color: inherit; text-decoration: none; }
 
 button {
   font-family: inherit;
@@ -67,29 +91,21 @@ button {
   outline: none;
 }
 
+button:not(:disabled):active {
+  transform: scale(0.97);
+  transition: transform 0.1s ease;
+}
+
 input, textarea, select {
   font-family: inherit;
   outline: none;
 }
 
 /* Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-base);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--border-hover);
-  border-radius: 99px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
-}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
 /* Selection */
 ::selection {
@@ -97,10 +113,9 @@ input, textarea, select {
   color: var(--accent-primary-hover);
 }
 
-/* Animations */
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+/* ─── Keyframes ──────────────────────────────────────────────────────────────── */
+
+@keyframes spin { to { transform: rotate(360deg); } }
 
 @keyframes bounce-dot {
   0%, 80%, 100% { transform: translateY(0); opacity: 0.35; }
@@ -112,13 +127,109 @@ input, textarea, select {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Utility */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes tooltip-in {
+  from { opacity: 0; transform: translateX(-50%) scale(0.9) translateY(4px); }
+  to   { opacity: 1; transform: translateX(-50%) scale(1) translateY(0); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+
+@keyframes skeleton-pulse {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+@keyframes shimmer-sweep {
+  0%   { left: -100%; }
+  100% { left: 160%; }
+}
+
+@keyframes border-glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.2), 0 0 0 2px rgba(99, 102, 241, 0.4) inset; }
+  50%       { box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.08), 0 0 0 2px rgba(99, 102, 241, 0.4) inset; }
+}
+
+/* ─── Utilities ──────────────────────────────────────────────────────────────── */
+
+.page-enter {
+  animation: fadeInUp 0.35s ease forwards;
+}
+
+.shake {
+  animation: shake 0.35s ease;
+}
+
+/* Skeleton shimmer */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-elevated) 0%,
+    rgba(45, 45, 68, 0.8) 50%,
+    var(--bg-elevated) 100%
+  );
+  background-size: 400px 100%;
+  animation: skeleton-pulse 1.4s ease infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* Shimmer sweep on hover */
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transform: skewX(-20deg);
+}
+
+.btn-shimmer:hover::after {
+  animation: shimmer-sweep 0.5s ease forwards;
+}
+
+/* Interactive word tokens in Reader */
+.word-token {
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 1px 1px;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.word-token:hover {
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.word-token.active {
+  background: rgba(99, 102, 241, 0.22);
+  color: var(--accent-primary);
+  border-radius: 4px;
+}
+
+/* Drag-over animation for drop zone */
+.drop-zone-dragging {
+  animation: border-glow-pulse 1.5s ease infinite;
+}
+
+/* Visually hidden */
 .visually-hidden {
   position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;

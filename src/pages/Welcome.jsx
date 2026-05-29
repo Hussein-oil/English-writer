@@ -9,7 +9,7 @@ const LANGUAGES = [
   { code: 'nl', name: 'Dutch', native: 'Nederlands' },
   { code: 'fr', name: 'French', native: 'Français' },
   { code: 'de', name: 'German', native: 'Deutsch' },
-  { code: 'hi', name: 'Hindi', native: 'हिंदी' },
+  { code: 'hi', name: 'Hindi', native: 'हिन्दी' },
   { code: 'id', name: 'Indonesian', native: 'Bahasa Indonesia' },
   { code: 'it', name: 'Italian', native: 'Italiano' },
   { code: 'ja', name: 'Japanese', native: '日本語' },
@@ -27,14 +27,14 @@ const LANGUAGES = [
 
 const SUBTITLES = {
   ar: 'منصتك الذكية لتعلم اللغة الإنجليزية',
-  fr: 'Votre plateforme intelligente pour apprendre l\'anglais',
+  fr: "Votre plateforme intelligente pour apprendre l'anglais",
   es: 'Tu plataforma inteligente para aprender inglés',
   zh: '您的智能英语学习平台',
   tr: 'İngilizce öğrenmek için akıllı platformunuz',
   fa: 'پلتفرم هوشمند شما برای یادگیری زبان انگلیسی',
   hi: 'अंग्रेजी सीखने के लिए आपका स्मार्ट प्लेटफॉर्म',
   de: 'Ihre intelligente Plattform zum Englischlernen',
-  it: 'La tua piattaforma intelligente per imparare l\'inglese',
+  it: "La tua piattaforma intelligente per imparare l'inglese",
   pt: 'Sua plataforma inteligente para aprender inglês',
   ru: 'Ваша умная платформа для изучения английского',
   ja: '英語学習のためのスマートプラットフォーム',
@@ -49,29 +49,13 @@ const SUBTITLES = {
 }
 
 const PROVIDERS = {
-  anthropic: {
-    label: 'Anthropic',
-    models: ['claude-opus-4-5', 'claude-sonnet-4-5', 'claude-haiku-4-5'],
-  },
-  openai: {
-    label: 'OpenAI',
-    models: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo'],
-  },
-  deepseek: {
-    label: 'DeepSeek',
-    models: ['deepseek-chat', 'deepseek-reasoner'],
-  },
-  google: {
-    label: 'Google',
-    models: ['gemini-1.5-pro', 'gemini-1.5-flash'],
-  },
-  groq: {
-    label: 'Groq',
-    models: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768', 'gemma2-9b-it'],
-  },
+  anthropic: { label: 'Anthropic', models: ['claude-opus-4-5', 'claude-sonnet-4-5', 'claude-haiku-4-5'] },
+  openai: { label: 'OpenAI', models: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo'] },
+  deepseek: { label: 'DeepSeek', models: ['deepseek-chat', 'deepseek-reasoner'] },
+  google: { label: 'Google', models: ['gemini-1.5-pro', 'gemini-1.5-flash'] },
+  groq: { label: 'Groq', models: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768', 'gemma2-9b-it'] },
 }
 
-// Providers that share the sk- key prefix — shown as a choice when ambiguous
 const SK_AMBIGUOUS = ['openai', 'deepseek']
 
 const CUSTOM_MODELS = [
@@ -90,7 +74,7 @@ function detectProvider(key) {
   if (key.startsWith('sk-ant-')) return 'anthropic'
   if (key.startsWith('gsk_')) return 'groq'
   if (key.startsWith('AIza')) return 'google'
-  if (key.startsWith('sk-')) return 'ambiguous'  // OpenAI and DeepSeek share this prefix
+  if (key.startsWith('sk-')) return 'ambiguous'
   return 'custom'
 }
 
@@ -106,21 +90,22 @@ export default function Welcome() {
   const [step, setStep] = useState(1)
   const [browserLang] = useState(getBrowserLang)
 
-  // Step 1
   const [langSearch, setLangSearch] = useState('')
   const [langOpen, setLangOpen] = useState(false)
   const [selectedLang, setSelectedLang] = useState(null)
   const langRef = useRef(null)
 
-  // Step 2
   const [apiKey, setApiKey] = useState('')
   const [showKey, setShowKey] = useState(false)
+  const [inputFocused, setInputFocused] = useState(false)
   const [detectedProvider, setDetectedProvider] = useState(null)
   const [ambiguousProviderChoice, setAmbiguousProviderChoice] = useState('')
   const [selectedModel, setSelectedModel] = useState('')
   const [customDropdownValue, setCustomDropdownValue] = useState('')
   const [customModel, setCustomModel] = useState('')
   const [detecting, setDetecting] = useState(false)
+  const [hoveredModel, setHoveredModel] = useState(null)
+  const [hoveredProvider, setHoveredProvider] = useState(null)
 
   const filteredLangs = LANGUAGES.filter(l =>
     l.name.toLowerCase().includes(langSearch.toLowerCase()) ||
@@ -129,9 +114,7 @@ export default function Welcome() {
 
   useEffect(() => {
     function handleClick(e) {
-      if (langRef.current && !langRef.current.contains(e.target)) {
-        setLangOpen(false)
-      }
+      if (langRef.current && !langRef.current.contains(e.target)) setLangOpen(false)
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
@@ -168,7 +151,6 @@ export default function Welcome() {
   function handleGetStarted() {
     let model
     let effectiveProvider = detectedProvider
-
     if (detectedProvider === 'custom') {
       model = customDropdownValue === '__custom__' ? customModel.trim() : customDropdownValue
     } else if (detectedProvider === 'ambiguous') {
@@ -177,14 +159,8 @@ export default function Welcome() {
     } else {
       model = selectedModel
     }
-
     if (!model || !effectiveProvider) return
-    saveConfig({
-      nativeLanguage: selectedLang.name,
-      apiKey: apiKey.trim(),
-      provider: effectiveProvider,
-      selectedModel: model,
-    })
+    saveConfig({ nativeLanguage: selectedLang.name, apiKey: apiKey.trim(), provider: effectiveProvider, selectedModel: model })
     navigate('/input')
   }
 
@@ -202,13 +178,17 @@ export default function Welcome() {
   const subtitle = SUBTITLES[browserLang] || 'Your intelligent English learning platform'
 
   return (
-    <div style={styles.page}>
-      <div style={styles.bg} />
+    <div style={styles.page} className="page-enter">
+      {/* Grid background */}
+      <div style={styles.gridBg} />
+      <div style={styles.gradientOverlay} />
 
       <div style={styles.container}>
         {/* Header */}
         <div style={styles.header}>
-          <div style={styles.logoMark} />
+          <div style={styles.logoRing}>
+            <div style={styles.logoMark} />
+          </div>
           <h1 style={styles.title}>EN-Teacher</h1>
           <p style={styles.subtitle}>{subtitle}</p>
         </div>
@@ -216,11 +196,13 @@ export default function Welcome() {
         {/* Step indicator */}
         <div style={styles.stepRow}>
           <div style={{ ...styles.stepDot, ...(step >= 1 ? styles.stepDotActive : {}) }}>
-            <span style={styles.stepNum}>1</span>
+            <span style={{ ...styles.stepNum, ...(step >= 1 ? styles.stepNumActive : {}) }}>1</span>
           </div>
-          <div style={{ ...styles.stepLine, ...(step >= 2 ? styles.stepLineActive : {}) }} />
+          <div style={styles.stepLineWrap}>
+            <div style={{ ...styles.stepLine, ...(step >= 2 ? styles.stepLineActive : {}) }} />
+          </div>
           <div style={{ ...styles.stepDot, ...(step >= 2 ? styles.stepDotActive : {}) }}>
-            <span style={styles.stepNum}>2</span>
+            <span style={{ ...styles.stepNum, ...(step >= 2 ? styles.stepNumActive : {}) }}>2</span>
           </div>
         </div>
 
@@ -233,13 +215,9 @@ export default function Welcome() {
                 We'll tailor explanations and translations to your mother tongue.
               </p>
 
-              {/* Dropdown */}
               <div style={styles.dropdownWrap} ref={langRef}>
                 <div
-                  style={{
-                    ...styles.dropdownTrigger,
-                    ...(langOpen ? styles.dropdownTriggerOpen : {}),
-                  }}
+                  style={{ ...styles.dropdownTrigger, ...(langOpen ? styles.dropdownTriggerOpen : {}) }}
                   onClick={() => setLangOpen(o => !o)}
                 >
                   {selectedLang ? (
@@ -287,14 +265,13 @@ export default function Welcome() {
               </div>
 
               <button
-                style={{
-                  ...styles.primaryBtn,
-                  ...(canProceedStep1 ? {} : styles.btnDisabled),
-                }}
+                style={{ ...styles.primaryBtn, ...(canProceedStep1 ? {} : styles.btnDisabled) }}
+                className="btn-shimmer"
                 disabled={!canProceedStep1}
                 onClick={() => setStep(2)}
               >
                 Continue
+                <ArrowRightIcon />
               </button>
             </div>
           )}
@@ -310,16 +287,20 @@ export default function Welcome() {
                 Your key is stored locally and never sent to our servers.
               </p>
 
-              {/* API Key input */}
               <div style={styles.inputGroup}>
                 <label style={styles.label}>API Key</label>
                 <div style={styles.inputWrap}>
                   <input
                     type={showKey ? 'text' : 'password'}
-                    style={styles.input}
+                    style={{
+                      ...styles.input,
+                      ...(inputFocused ? styles.inputFocused : {}),
+                    }}
                     placeholder="Enter your API key..."
                     value={apiKey}
                     onChange={e => { setApiKey(e.target.value); resetProviderState() }}
+                    onFocus={() => setInputFocused(true)}
+                    onBlur={() => setInputFocused(false)}
                     autoComplete="off"
                     spellCheck={false}
                   />
@@ -335,10 +316,7 @@ export default function Welcome() {
               </div>
 
               <button
-                style={{
-                  ...styles.detectBtn,
-                  ...((!apiKey.trim() || detecting) ? styles.btnDisabled : {}),
-                }}
+                style={{ ...styles.detectBtn, ...((!apiKey.trim() || detecting) ? styles.btnDisabled : {}) }}
                 disabled={!apiKey.trim() || detecting}
                 onClick={handleDetect}
               >
@@ -346,7 +324,6 @@ export default function Welcome() {
                 {detecting ? 'Detecting...' : 'Detect Model Provider'}
               </button>
 
-              {/* Provider result */}
               {detectedProvider && (
                 <div style={styles.providerSection}>
                   <div style={styles.providerBadge}>
@@ -371,13 +348,14 @@ export default function Welcome() {
                             style={{
                               ...styles.providerChoiceCard,
                               ...(ambiguousProviderChoice === p ? styles.providerChoiceCardSelected : {}),
+                              ...(hoveredProvider === p && ambiguousProviderChoice !== p ? styles.providerChoiceCardHover : {}),
                             }}
+                            onMouseEnter={() => setHoveredProvider(p)}
+                            onMouseLeave={() => setHoveredProvider(null)}
                             onClick={() => { setAmbiguousProviderChoice(p); setSelectedModel('') }}
                           >
                             <span style={styles.providerChoiceName}>{PROVIDERS[p].label}</span>
-                            <span style={styles.providerChoiceHint}>
-                              {PROVIDERS[p].models.join(' · ')}
-                            </span>
+                            <span style={styles.providerChoiceHint}>{PROVIDERS[p].models.join(' · ')}</span>
                           </button>
                         ))}
                       </div>
@@ -392,10 +370,14 @@ export default function Welcome() {
                                 style={{
                                   ...styles.modelCard,
                                   ...(selectedModel === m ? styles.modelCardSelected : {}),
+                                  ...(hoveredModel === m && selectedModel !== m ? styles.modelCardHover : {}),
                                 }}
+                                onMouseEnter={() => setHoveredModel(m)}
+                                onMouseLeave={() => setHoveredModel(null)}
                                 onClick={() => setSelectedModel(m)}
                               >
                                 <span style={styles.modelName}>{m}</span>
+                                {selectedModel === m && <CheckmarkIcon />}
                               </button>
                             ))}
                           </div>
@@ -412,10 +394,14 @@ export default function Welcome() {
                             style={{
                               ...styles.modelCard,
                               ...(selectedModel === m ? styles.modelCardSelected : {}),
+                              ...(hoveredModel === m && selectedModel !== m ? styles.modelCardHover : {}),
                             }}
+                            onMouseEnter={() => setHoveredModel(m)}
+                            onMouseLeave={() => setHoveredModel(null)}
                             onClick={() => setSelectedModel(m)}
                           >
                             <span style={styles.modelName}>{m}</span>
+                            {selectedModel === m && <CheckmarkIcon />}
                           </button>
                         ))}
                       </div>
@@ -430,9 +416,7 @@ export default function Welcome() {
                           onChange={e => { setCustomDropdownValue(e.target.value); setCustomModel('') }}
                         >
                           <option value="" disabled>Choose a model...</option>
-                          {CUSTOM_MODELS.map(m => (
-                            <option key={m} value={m}>{m}</option>
-                          ))}
+                          {CUSTOM_MODELS.map(m => <option key={m} value={m}>{m}</option>)}
                           <option value="__custom__">Custom — enter manually</option>
                         </select>
                         <SelectChevronIcon />
@@ -451,14 +435,14 @@ export default function Welcome() {
                 </div>
               )}
 
-              {/* Get Started */}
               {detectedProvider && (
                 <button
                   style={{
                     ...styles.primaryBtn,
-                    ...styles.getStartedBtn,
+                    marginTop: '4px',
                     ...(canGetStarted ? {} : styles.btnDisabled),
                   }}
+                  className="btn-shimmer"
                   disabled={!canGetStarted}
                   onClick={handleGetStarted}
                 >
@@ -478,7 +462,7 @@ export default function Welcome() {
   )
 }
 
-// ─── Inline styles ────────────────────────────────────────────────────────────
+// ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = {
   page: {
@@ -490,10 +474,22 @@ const styles = {
     position: 'relative',
     overflow: 'hidden',
   },
-  bg: {
+  gridBg: {
     position: 'fixed',
     inset: 0,
-    background: 'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(99,102,241,0.12) 0%, transparent 70%), #0a0a0f',
+    backgroundImage: `
+      linear-gradient(var(--border-subtle) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px)
+    `,
+    backgroundSize: '48px 48px',
+    opacity: 0.4,
+    zIndex: 0,
+    pointerEvents: 'none',
+  },
+  gradientOverlay: {
+    position: 'fixed',
+    inset: 0,
+    background: 'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(99,102,241,0.14) 0%, transparent 70%)',
     zIndex: 0,
     pointerEvents: 'none',
   },
@@ -514,13 +510,18 @@ const styles = {
     alignItems: 'center',
     gap: '12px',
   },
+  logoRing: {
+    padding: '3px',
+    borderRadius: '18px',
+    background: 'linear-gradient(135deg, rgba(99,102,241,0.6) 0%, rgba(139,92,246,0.6) 100%)',
+    boxShadow: '0 0 32px rgba(99,102,241,0.25)',
+    marginBottom: '4px',
+  },
   logoMark: {
     width: '48px',
     height: '48px',
     borderRadius: '14px',
     background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-    boxShadow: '0 0 32px rgba(99,102,241,0.35)',
-    marginBottom: '4px',
   },
   title: {
     fontSize: '2.5rem',
@@ -541,12 +542,12 @@ const styles = {
   stepRow: {
     display: 'flex',
     alignItems: 'center',
+    width: '140px',
     gap: '0',
-    width: '120px',
   },
   stepDot: {
-    width: '32px',
-    height: '32px',
+    width: '36px',
+    height: '36px',
     borderRadius: '50%',
     border: '2px solid var(--border)',
     display: 'flex',
@@ -554,26 +555,37 @@ const styles = {
     justifyContent: 'center',
     background: 'var(--bg-surface)',
     flexShrink: 0,
-    transition: 'all 250ms ease',
+    transition: 'all 300ms ease',
+    position: 'relative',
   },
   stepDotActive: {
     borderColor: 'var(--accent-primary)',
     background: 'var(--accent-primary-dim)',
-    boxShadow: '0 0 12px rgba(99,102,241,0.25)',
+    boxShadow: '0 0 0 4px rgba(99,102,241,0.1), 0 0 16px rgba(99,102,241,0.2)',
   },
   stepNum: {
-    fontSize: '0.75rem',
-    fontWeight: '600',
-    color: 'var(--text-secondary)',
+    fontSize: '0.78rem',
+    fontWeight: '700',
+    color: 'var(--text-muted)',
+    transition: 'color 300ms ease',
   },
-  stepLine: {
+  stepNumActive: {
+    color: 'var(--accent-primary)',
+  },
+  stepLineWrap: {
     flex: 1,
     height: '2px',
     background: 'var(--border)',
-    transition: 'background 250ms ease',
+    overflow: 'hidden',
+  },
+  stepLine: {
+    height: '100%',
+    width: '0%',
+    background: 'var(--accent-primary)',
+    transition: 'width 400ms cubic-bezier(0.4, 0, 0.2, 1)',
   },
   stepLineActive: {
-    background: 'var(--accent-primary)',
+    width: '100%',
   },
   card: {
     width: '100%',
@@ -581,7 +593,7 @@ const styles = {
     border: '1px solid var(--border)',
     borderRadius: 'var(--radius-xl)',
     padding: '36px',
-    boxShadow: '0 4px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(99,102,241,0.06)',
+    boxShadow: '0 4px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(99,102,241,0.06)',
   },
   stepContent: {
     display: 'flex',
@@ -600,10 +612,7 @@ const styles = {
     lineHeight: '1.6',
     marginTop: '-8px',
   },
-  // Dropdown
-  dropdownWrap: {
-    position: 'relative',
-  },
+  dropdownWrap: { position: 'relative' },
   dropdownTrigger: {
     width: '100%',
     background: 'var(--bg-elevated)',
@@ -614,31 +623,17 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    transition: 'border-color var(--transition)',
+    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
     userSelect: 'none',
   },
   dropdownTriggerOpen: {
     borderColor: 'var(--accent-primary)',
-    boxShadow: '0 0 0 3px var(--accent-primary-dim)',
+    boxShadow: '0 0 0 3px var(--accent-glow)',
   },
-  placeholder: {
-    color: 'var(--text-muted)',
-    fontSize: '0.9rem',
-  },
-  selectedLangDisplay: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-  },
-  selectedLangName: {
-    fontSize: '0.9rem',
-    fontWeight: '500',
-    color: 'var(--text-primary)',
-  },
-  selectedLangNative: {
-    fontSize: '0.85rem',
-    color: 'var(--text-secondary)',
-  },
+  placeholder: { color: 'var(--text-muted)', fontSize: '0.9rem' },
+  selectedLangDisplay: { display: 'flex', alignItems: 'center', gap: '10px' },
+  selectedLangName: { fontSize: '0.9rem', fontWeight: '500', color: 'var(--text-primary)' },
+  selectedLangNative: { fontSize: '0.85rem', color: 'var(--text-secondary)' },
   dropdown: {
     position: 'absolute',
     top: 'calc(100% + 6px)',
@@ -666,54 +661,28 @@ const styles = {
     fontSize: '0.875rem',
     outline: 'none',
   },
-  langList: {
-    maxHeight: '220px',
-    overflowY: 'auto',
-  },
+  langList: { maxHeight: '220px', overflowY: 'auto' },
   langItem: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: '10px 14px',
     cursor: 'pointer',
-    transition: 'background var(--transition)',
+    transition: 'background 0.15s ease',
   },
-  langItemSelected: {
-    background: 'var(--accent-primary-dim)',
-  },
-  langItemName: {
-    fontSize: '0.875rem',
-    color: 'var(--text-primary)',
-    fontWeight: '500',
-  },
-  langItemNative: {
-    fontSize: '0.8rem',
-    color: 'var(--text-secondary)',
-  },
-  noResults: {
-    padding: '16px 14px',
-    color: 'var(--text-muted)',
-    fontSize: '0.875rem',
-    textAlign: 'center',
-  },
-  // Inputs
-  inputGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-  },
+  langItemSelected: { background: 'var(--accent-primary-dim)' },
+  langItemName: { fontSize: '0.875rem', color: 'var(--text-primary)', fontWeight: '500' },
+  langItemNative: { fontSize: '0.8rem', color: 'var(--text-secondary)' },
+  noResults: { padding: '16px 14px', color: 'var(--text-muted)', fontSize: '0.875rem', textAlign: 'center' },
+  inputGroup: { display: 'flex', flexDirection: 'column', gap: '8px' },
   label: {
-    fontSize: '0.8rem',
-    fontWeight: '500',
+    fontSize: '0.75rem',
+    fontWeight: '600',
     color: 'var(--text-secondary)',
-    letterSpacing: '0.04em',
     textTransform: 'uppercase',
+    letterSpacing: '0.06em',
   },
-  inputWrap: {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-  },
+  inputWrap: { position: 'relative', display: 'flex', alignItems: 'center' },
   input: {
     width: '100%',
     background: 'var(--bg-elevated)',
@@ -722,8 +691,12 @@ const styles = {
     padding: '12px 44px 12px 14px',
     color: 'var(--text-primary)',
     fontSize: '0.875rem',
-    transition: 'border-color var(--transition), box-shadow var(--transition)',
+    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
     fontFamily: 'inherit',
+  },
+  inputFocused: {
+    borderColor: 'var(--accent-primary)',
+    boxShadow: '0 0 0 3px var(--accent-glow)',
   },
   eyeBtn: {
     position: 'absolute',
@@ -736,9 +709,8 @@ const styles = {
     alignItems: 'center',
     padding: '4px',
     borderRadius: '4px',
-    transition: 'color var(--transition)',
+    transition: 'color 0.2s ease',
   },
-  // Buttons
   primaryBtn: {
     width: '100%',
     background: 'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)',
@@ -749,17 +721,15 @@ const styles = {
     fontSize: '0.9rem',
     fontWeight: '600',
     cursor: 'pointer',
-    transition: 'opacity var(--transition), transform var(--transition)',
+    transition: 'opacity 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     gap: '8px',
     letterSpacing: '0.01em',
+    boxShadow: '0 4px 16px rgba(99,102,241,0.25)',
   },
-  btnDisabled: {
-    opacity: 0.35,
-    cursor: 'not-allowed',
-  },
+  btnDisabled: { opacity: 0.35, cursor: 'not-allowed' },
   detectBtn: {
     width: '100%',
     background: 'var(--bg-elevated)',
@@ -774,7 +744,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     gap: '8px',
-    transition: 'border-color var(--transition), box-shadow var(--transition)',
+    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
   },
   backBtn: {
     background: 'none',
@@ -788,9 +758,8 @@ const styles = {
     gap: '6px',
     padding: '0',
     marginBottom: '-4px',
-    transition: 'color var(--transition)',
+    transition: 'color 0.2s ease',
   },
-  // Provider section
   providerSection: {
     display: 'flex',
     flexDirection: 'column',
@@ -800,11 +769,7 @@ const styles = {
     border: '1px solid var(--border)',
     borderRadius: 'var(--radius-md)',
   },
-  providerBadge: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-  },
+  providerBadge: { display: 'flex', alignItems: 'center', gap: '8px' },
   providerDot: {
     width: '8px',
     height: '8px',
@@ -817,35 +782,32 @@ const styles = {
     background: '#f59e0b',
     boxShadow: '0 0 8px rgba(245,158,11,0.5)',
   },
-  providerChoiceGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '10px',
-  },
+  providerChoiceGrid: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' },
   providerChoiceCard: {
     background: 'var(--bg-elevated)',
     border: '1px solid var(--border)',
     borderRadius: 'var(--radius-md)',
-    padding: '14px 14px',
+    padding: '14px',
     cursor: 'pointer',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'flex-start',
     gap: '5px',
     textAlign: 'left',
-    transition: 'border-color var(--transition), background var(--transition)',
+    transition: 'border-color 0.2s ease, background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease',
     fontFamily: 'inherit',
   },
   providerChoiceCardSelected: {
     borderColor: 'var(--accent-primary)',
     background: 'var(--accent-primary-dim)',
-    boxShadow: '0 0 0 3px var(--accent-primary-dim)',
+    boxShadow: '0 0 0 3px var(--accent-glow)',
   },
-  providerChoiceName: {
-    fontSize: '0.95rem',
-    fontWeight: '700',
-    color: 'var(--text-primary)',
+  providerChoiceCardHover: {
+    borderColor: 'var(--border-hover)',
+    transform: 'translateY(-1px)',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
   },
+  providerChoiceName: { fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-primary)' },
   providerChoiceHint: {
     fontSize: '0.72rem',
     color: 'var(--text-muted)',
@@ -860,17 +822,13 @@ const styles = {
     textTransform: 'uppercase',
   },
   selectModelLabel: {
-    fontSize: '0.78rem',
+    fontSize: '0.72rem',
     color: 'var(--text-muted)',
-    fontWeight: '500',
+    fontWeight: '600',
     textTransform: 'uppercase',
-    letterSpacing: '0.05em',
+    letterSpacing: '0.06em',
   },
-  selectWrap: {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-  },
+  selectWrap: { position: 'relative', display: 'flex', alignItems: 'center' },
   modelSelect: {
     width: '100%',
     appearance: 'none',
@@ -884,13 +842,9 @@ const styles = {
     fontFamily: "'SF Mono', 'Cascadia Code', monospace",
     cursor: 'pointer',
     outline: 'none',
-    transition: 'border-color 150ms ease, box-shadow 150ms ease',
+    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
   },
-  modelGrid: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px',
-  },
+  modelGrid: { display: 'flex', flexDirection: 'column', gap: '6px' },
   modelCard: {
     background: 'var(--bg-elevated)',
     border: '1px solid var(--border)',
@@ -898,22 +852,27 @@ const styles = {
     padding: '10px 14px',
     cursor: 'pointer',
     textAlign: 'left',
-    transition: 'border-color var(--transition), background var(--transition)',
+    transition: 'border-color 0.2s ease, background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease',
     display: 'flex',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    fontFamily: 'inherit',
   },
   modelCardSelected: {
     borderColor: 'var(--accent-primary)',
     background: 'var(--accent-primary-dim)',
+    boxShadow: '0 0 0 1px rgba(99,102,241,0.15)',
+  },
+  modelCardHover: {
+    borderColor: 'var(--border-hover)',
+    transform: 'translateY(-2px)',
+    boxShadow: '0 4px 16px rgba(99,102,241,0.1)',
   },
   modelName: {
     fontSize: '0.85rem',
     fontWeight: '500',
     color: 'var(--text-primary)',
-    fontFamily: '\'SF Mono\', \'Cascadia Code\', monospace',
-  },
-  getStartedBtn: {
-    marginTop: '4px',
+    fontFamily: "'SF Mono', 'Cascadia Code', monospace",
   },
   footer: {
     fontSize: '0.75rem',
@@ -927,7 +886,8 @@ const styles = {
 
 function ChevronIcon({ open }) {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, transition: 'transform 150ms ease', transform: open ? 'rotate(180deg)' : 'none' }}>
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
+      style={{ flexShrink: 0, transition: 'transform 150ms ease', transform: open ? 'rotate(180deg)' : 'none' }}>
       <path d="M4 6l4 4 4-4" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
@@ -935,7 +895,8 @@ function ChevronIcon({ open }) {
 
 function SelectChevronIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ position: 'absolute', right: '13px', pointerEvents: 'none', flexShrink: 0 }}>
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+      style={{ position: 'absolute', right: '13px', pointerEvents: 'none', flexShrink: 0 }}>
       <path d="M3 5l4 4 4-4" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
@@ -962,7 +923,8 @@ function EyeIcon() {
 function EyeOffIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path d="M2 2l12 12M6.5 6.5A2 2 0 009.5 9.5M4.5 4.5C2.8 5.6 1.5 7.5 1.5 8s2.5 5 6.5 5a7.3 7.3 0 003.5-.9M6.5 3.1A7 7 0 0114.5 8c-.4.9-1 1.8-1.7 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M2 2l12 12M6.5 6.5A2 2 0 009.5 9.5M4.5 4.5C2.8 5.6 1.5 7.5 1.5 8s2.5 5 6.5 5a7.3 7.3 0 003.5-.9M6.5 3.1A7 7 0 0114.5 8c-.4.9-1 1.8-1.7 2.5"
+        stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   )
 }
@@ -986,7 +948,8 @@ function ArrowRightIcon() {
 function ScanIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-      <path d="M1 4V2a1 1 0 011-1h2M11 1h2a1 1 0 011 1v2M14 11v2a1 1 0 01-1 1h-2M4 14H2a1 1 0 01-1-1v-2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+      <path d="M1 4V2a1 1 0 011-1h2M11 1h2a1 1 0 011 1v2M14 11v2a1 1 0 01-1 1h-2M4 14H2a1 1 0 01-1-1v-2"
+        stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
       <path d="M1 7.5h13" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
     </svg>
   )
@@ -996,7 +959,16 @@ function SpinnerIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 15 15" fill="none" style={{ animation: 'spin 0.8s linear infinite' }}>
       <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
-      <circle cx="7.5" cy="7.5" r="6" stroke="currentColor" strokeWidth="1.5" strokeDasharray="28" strokeDashoffset="10" strokeLinecap="round" />
+      <circle cx="7.5" cy="7.5" r="6" stroke="currentColor" strokeWidth="1.5"
+        strokeDasharray="28" strokeDashoffset="10" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function CheckmarkIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0 }}>
+      <path d="M2.5 7l3 3 6-6" stroke="var(--accent-primary)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
